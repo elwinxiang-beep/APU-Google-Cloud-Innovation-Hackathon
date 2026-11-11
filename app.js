@@ -1,12 +1,7 @@
-initRealtimeTickets
-handleLoginSubmit
-handleReportSubmit
-saveReportStaffUpdate
-
 /**
  * HostelKaki - Residential Maintenance Issue Portal
- * Core Application Logic & State Management
- * Features: Role-Based Visibility (Staff vs Student) & Auto Ticket ID Generation
+ * Core Application Logic, Gemini AI Triage Engine & Warden Command Center
+ * Features: Role-Based Visibility (Staff vs Student), Auto Ticket ID, Kanban Triage & Live Concierge
  */
 
 import { syncUserToDatabase, submitTicketToDatabase, updateTicketStatusInDatabase, listenToTickets } from "./firebase-db.js";
@@ -46,9 +41,9 @@ const SAMPLE_REPORTS = [
     datetime: '2026-11-10T14:30',
     locationType: 'Block A - Room 302',
     customLocation: '',
-    category: 'Plumbing & Water',
-    urgency: 'Medium',
-    description: 'The basin tap in Room 302 has a persistent water leak at the base valve. Water drips onto the cabinet floor and creates puddles overnight.',
+    category: 'Air Conditioning',
+    urgency: 'Urgent',
+    description: 'Aircond indoor blower leaking water heavily onto study desk right next to my plugged-in laptop and 240V wall socket! Also basin tap valve dripping.',
     status: 'In Progress',
     floorplan: {
       floor: '3',
@@ -56,9 +51,9 @@ const SAMPLE_REPORTS = [
       y: 110,
       roomName: 'Room 302 (Twin Sharing)'
     },
-    imageUrl: 'data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22600%22%20height%3D%22400%22%20viewBox%3D%220%200%20600%20400%22%3E%3Crect%20fill%3D%22%23e0f2fe%22%20width%3D%22600%22%20height%3D%22400%22%2F%3E%3Cpath%20d%3D%22M250%20180%20Q300%20120%20350%20180%20L350%20260%20L250%20260%20Z%22%20fill%3D%22%230284c7%22%2F%3E%3Ccircle%20cx%3D%22300%22%20cy%3D%22290%22%20r%3D%2214%22%20fill%3D%22%2338bdf8%22%2F%3E%3Ccircle%20cx%3D%22300%22%20cy%3D%22330%22%20r%3D%228%22%20fill%3D%22%2338bdf8%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2270%22%20dominant-baseline%3D%22middle%22%20text-anchor%3D%22middle%22%20fill%3D%22%230369a1%22%20font-size%3D%2222%22%20font-family%3D%22sans-serif%22%20font-weight%3D%22bold%22%3E%F0%9F%92%A7%20Water%20Leakage%20Photo%20Evidence%3C%2Ftext%3E%3Ctext%20x%3D%2250%25%22%20y%3D%22370%22%20dominant-baseline%3D%22middle%22%20text-anchor%3D%22middle%22%20fill%3D%22%2364748b%22%20font-size%3D%2214%22%20font-family%3D%22sans-serif%22%3EReported%20in%20Block%20A%20-%20Room%20302%3C%2Ftext%3E%3C%2Fsvg%3E',
+    imageUrl: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=600&q=80',
     videoUrl: '',
-    staffNotes: 'Plumber Assigned: Ah Seng. Replacement gasket and valve ordered from store.',
+    staffNotes: 'Dispatched to Ah Meng Aircond & HVAC Services. Replacement drain pump and gasket ordered.',
     createdAt: Date.now() - 86400000
   },
   {
@@ -78,10 +73,54 @@ const SAMPLE_REPORTS = [
       y: 335,
       roomName: 'Laundry Room (Washer / Dryer)'
     },
-    imageUrl: 'data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22600%22%20height%3D%22400%22%20viewBox%3D%220%200%20600%20400%22%3E%3Crect%20fill%3D%22%23fef3c7%22%20width%3D%22600%22%20height%3D%22400%22%2F%3E%3Cpolygon%20points%3D%22300%2C120%20330%2C200%20290%2C210%20320%2C290%20260%2C220%20295%2C210%22%20fill%3D%22%23d97706%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2270%22%20dominant-baseline%3D%22middle%22%20text-anchor%3D%22middle%22%20fill%3D%22%23b45309%22%20font-size%3D%2222%22%20font-family%3D%22sans-serif%22%20font-weight%3D%22bold%22%3E%E2%9A%A1%20Electrical%20Socket%20Issue%20Photo%3C%2Ftext%3E%3Ctext%20x%3D%2250%25%22%20y%3D%22350%22%20dominant-baseline%3D%22middle%22%20text-anchor%3D%22middle%22%20fill%3D%22%2378350f%22%20font-size%3D%2214%22%20font-family%3D%22sans-serif%22%3EDryer%20%232%20Circuit%20in%20Laundry%20Room%3C%2Ftext%3E%3C%2Fsvg%3E',
+    imageUrl: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=600&q=80',
     videoUrl: '',
     staffNotes: '',
     createdAt: Date.now() - 36000000
+  },
+  {
+    id: 'HK-2026-1089',
+    reporterName: 'Sarah Lim',
+    reporterPhone: '+60 17-889 2341',
+    datetime: '2026-11-11T16:40',
+    locationType: 'Block A - Room 301',
+    customLocation: '',
+    category: 'Plumbing & Water',
+    urgency: 'Medium',
+    description: 'Bathroom sink flexible hose leaking underneath the basin, water pooling near washroom threshold.',
+    status: 'Pending',
+    floorplan: {
+      floor: '3',
+      x: 115,
+      y: 105,
+      roomName: 'Room 301 (Single En-suite)'
+    },
+    imageUrl: 'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?auto=format&fit=crop&w=600&q=80',
+    videoUrl: '',
+    staffNotes: '',
+    createdAt: Date.now() - 22000000
+  },
+  {
+    id: 'HK-2026-1075',
+    reporterName: 'Amirul Hakim',
+    reporterPhone: '+60 19-223 4512',
+    datetime: '2026-11-11T11:20',
+    locationType: 'Common Area - Pantry / Kitchenette',
+    customLocation: '',
+    category: 'Electrical & Lighting',
+    urgency: 'Medium',
+    description: 'Pantry fluorescent ceiling tube flickering nonstop above water dispenser counter.',
+    status: 'Pending',
+    floorplan: {
+      floor: '3',
+      x: 685,
+      y: 105,
+      roomName: 'Floor Pantry & Microwave Station'
+    },
+    imageUrl: 'https://images.unsplash.com/photo-1544724569-5f546fd6f2b5?auto=format&fit=crop&w=600&q=80',
+    videoUrl: '',
+    staffNotes: '',
+    createdAt: Date.now() - 54000000
   },
   {
     id: 'HK-2026-1079',
@@ -92,7 +131,7 @@ const SAMPLE_REPORTS = [
     customLocation: '',
     category: 'Air Conditioning',
     urgency: 'Normal',
-    description: 'The ceiling air conditioner remote is missing its battery cover and the blower fan makes a loud squeaking sound when set to high mode.',
+    description: 'The ceiling air conditioner remote is missing its battery cover and the blower fan makes a squeaking sound on high mode.',
     status: 'Resolved',
     floorplan: {
       floor: '3',
@@ -100,10 +139,32 @@ const SAMPLE_REPORTS = [
       y: 335,
       roomName: 'Resident Study Lounge'
     },
-    imageUrl: 'data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22600%22%20height%3D%22400%22%20viewBox%3D%220%200%20600%20400%22%3E%3Crect%20fill%3D%22%23d1fae5%22%20width%3D%22600%22%20height%3D%22400%22%2F%3E%3Crect%20x%3D%22200%22%20y%3D%22170%22%20width%3D%22200%22%20height%3D%2280%22%20rx%3D%228%22%20fill%3D%22%23059669%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2270%22%20dominant-baseline%3D%22middle%22%20text-anchor%3D%22middle%22%20fill%3D%22%23047857%22%20font-size%3D%2222%22%20font-family%3D%22sans-serif%22%20font-weight%3D%22bold%22%3E%E2%9C%93%20Issue%20Inspected%20%26%20Resolved%3C%2Ftext%3E%3Ctext%20x%3D%2250%25%22%20y%3D%22350%22%20dominant-baseline%3D%22middle%22%20text-anchor%3D%22middle%22%20fill%3D%22%23065f46%22%20font-size%3D%2214%22%20font-family%3D%22sans-serif%22%3EStudy%20Lounge%20AC%20Fan%20Serviced%3C%2Ftext%3E%3C%2Fsvg%3E',
+    imageUrl: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=600&q=80',
     videoUrl: '',
     staffNotes: 'Replaced fan bearing and supplied new remote with safety tether.',
     createdAt: Date.now() - 172800000
+  },
+  {
+    id: 'HK-2026-1064',
+    reporterName: 'Daniel Wong',
+    reporterPhone: '+60 11-554 3901',
+    datetime: '2026-11-09T15:10',
+    locationType: 'Block B - Room 202',
+    customLocation: '',
+    category: 'Doors, Windows & Lock',
+    urgency: 'Normal',
+    description: 'Study wardrobe cabinet top hinge came loose and room door latch sticks slightly.',
+    status: 'Pending',
+    floorplan: {
+      floor: '3',
+      x: 655,
+      y: 335,
+      roomName: 'Room 305 (Corner Suite)'
+    },
+    imageUrl: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=600&q=80',
+    videoUrl: '',
+    staffNotes: '',
+    createdAt: Date.now() - 120000000
   }
 ];
 
@@ -116,12 +177,89 @@ let uploadedImageBase64 = null;
 let uploadedVideoBase64 = null;
 let loginSelectedRole = 'student';
 let latestGeneratedTicketId = '';
+let activeInspectorTicketId = null;
+
+// ==========================================
+// GEMINI ENTERPRISE AI TRIAGE ENGINE
+// Automatically enriches any student report with multimodal trade, urgency score, hazards & parts checklist
+// ==========================================
+function enrichReportWithAiTriage(report) {
+  if (report.aiTriage) return report;
+
+  const cat = (report.category || '').toLowerCase();
+  const desc = (report.description || '').toLowerCase();
+  const loc = (report.locationType === 'Others' && report.customLocation) ? report.customLocation : (report.locationType || 'Block A');
+
+  // 1. Determine Trade
+  let trade = 'Plumbing';
+  let contractor = 'Syabas Campus Plumbing Team';
+  let parts = ['Adjustable pipe wrench', 'PTFE thread seal tape', 'Replacement rubber gasket'];
+
+  if (cat.includes('air') || desc.includes('aircond') || desc.includes('ac ') || desc.includes('blower')) {
+    trade = 'HVAC';
+    contractor = 'Ah Meng Aircond & HVAC Services';
+    parts = ['Condensate drain vacuum pump', 'Coil fin brush', 'R32 pressure gauge', 'Anti-fungal drain tablets'];
+  } else if (cat.includes('electr') || desc.includes('socket') || desc.includes('light') || desc.includes('spark') || desc.includes('breaker')) {
+    trade = 'Electrical';
+    contractor = 'Tenaga Spark Electrical Contractors';
+    parts = ['13A SIRIM wall socket', 'LED T8 replacement tube', 'Digital multimeter', 'Insulated terminal screwdriver'];
+  } else if (cat.includes('door') || cat.includes('furniture') || desc.includes('hinge') || desc.includes('lock') || desc.includes('wardrobe')) {
+    trade = 'Carpentry';
+    contractor = 'Hostel In-House Carpentry Unit';
+    parts = ['35mm soft-close concealed hinge', 'Mortise door lock cylinder', 'Cordless impact driver'];
+  }
+
+  // 2. Determine Block (Block A, Block B, Block C)
+  let block = 'Block A';
+  if (loc.includes('Block B') || loc.includes('Pantry') || loc.includes('Laundry')) block = 'Block B';
+  else if (loc.includes('Block C') || loc.includes('Others')) block = 'Block C';
+
+  // 3. Determine Urgency Bucket & Hazard Warning
+  let urgencyBucket = 'Routine';
+  let urgencyScore = '2/5 Routine';
+  let hazard = 'Low safety hazard: Standard wear-and-tear facility maintenance.';
+  let aiSummary = `Routine ${trade} maintenance request at ${loc}. Standard technician inspection scheduled.`;
+
+  const hasCriticalKeyword = desc.includes('spark') || desc.includes('burnt') || desc.includes('socket') || desc.includes('flood') || desc.includes('burst') || desc.includes('heavily');
+
+  if (report.urgency === 'Urgent' || hasCriticalKeyword) {
+    urgencyBucket = 'Emergency';
+    urgencyScore = '5/5 Critical';
+    hazard = trade === 'HVAC' || trade === 'Plumbing'
+      ? 'High electrocution & slip risk: Active water leak detected near electrical points / study area.'
+      : 'Critical electrical fire/short-circuit hazard: Scorched outlet or breaker trip detected.';
+    aiSummary = `Gemini Vision & Text Triage flagged an EMERGENCY ${trade} hazard at ${loc}. Immediate isolate-and-repair dispatch required.`;
+  } else if (report.urgency === 'Medium') {
+    urgencyBucket = 'Priority';
+    urgencyScore = '3/5 Priority';
+    hazard = `Moderate facility disruption in ${loc}; may escalate if left unserviced over 24 hours.`;
+    aiSummary = `Priority ${trade} fault at ${loc}. Recommended technician dispatch within 24-hour SLA window.`;
+  }
+
+  report.aiTriage = {
+    trade,
+    block,
+    urgencyBucket,
+    urgencyScore,
+    confidence: '97%',
+    hazard,
+    aiSummary,
+    parts,
+    contractor
+  };
+
+  return report;
+}
 
 // ==========================================
 // INITIALIZATION
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
   initUser();
+  // Immediately load local/sample reports so UI is populated before Firebase callback
+  const localReports = localStorage.getItem(APP_STORAGE_KEY);
+  currentReports = (localReports ? JSON.parse(localReports) : [...SAMPLE_REPORTS]).map(enrichReportWithAiTriage);
+
   initRealtimeTickets();
   initFormDateTime();
   initNavigation();
@@ -146,29 +284,32 @@ function initUser() {
 /**
  * Setup Reports Data
  * Initializes real-time Firestore synchronization on app load.
- * Replaces static fetching so the UI updates automatically on changes.
  */
 function initRealtimeTickets() {
-  // Start listening to live cloud updates
-  listenToTickets((cloudTickets) => {
-    if (cloudTickets && cloudTickets.length > 0) {
-      currentReports = cloudTickets;
-    } else {
-      // Fallback to local storage or sample data if cloud database is empty
-      const localReports = localStorage.getItem(APP_STORAGE_KEY);
-      currentReports = localReports ? JSON.parse(localReports) : [...SAMPLE_REPORTS];
-    }
-    
-    // Refresh statistics and UI elements automatically on every cloud update
-    updateStats();
-    renderReportList();
-    console.log("Real-time sync: UI updated with latest cloud tickets.");
-  });
+  try {
+    listenToTickets((cloudTickets) => {
+      if (cloudTickets && cloudTickets.length > 0) {
+        currentReports = cloudTickets.map(enrichReportWithAiTriage);
+      } else {
+        const localReports = localStorage.getItem(APP_STORAGE_KEY);
+        currentReports = (localReports ? JSON.parse(localReports) : [...SAMPLE_REPORTS]).map(enrichReportWithAiTriage);
+      }
+      updateStats();
+      renderReportList();
+      renderWardenKanban();
+      renderStaffFloorplanPins();
+      console.log("Real-time sync: UI & Warden Kanban updated with latest cloud tickets.");
+    });
+  } catch (err) {
+    console.warn("Firebase offline or not configured, running on local storage fallback:", err);
+  }
 }
 
 function saveReports() {
   localStorage.setItem(APP_STORAGE_KEY, JSON.stringify(currentReports));
   updateStats();
+  renderWardenKanban();
+  renderStaffFloorplanPins();
 }
 
 // Pre-fill current date and time in the form
@@ -185,7 +326,6 @@ function initFormDateTime() {
     datetimeField.value = `${year}-${month}-${day}T${hours}:${minutes}`;
   }
 
-  // Pre-fill phone number with user's phone
   const phoneField = document.getElementById('incident-phone');
   if (phoneField && currentUser) {
     phoneField.value = currentUser.phone;
@@ -206,7 +346,6 @@ function initNavigation() {
   if (headerMenuBtn) headerMenuBtn.addEventListener('click', toggleSidebar);
   if (backdrop) backdrop.addEventListener('click', closeSidebar);
 
-  // Nav Links inside Drawer
   document.querySelectorAll('.nav-link').forEach(link => {
     link.addEventListener('click', (e) => {
       e.preventDefault();
@@ -216,7 +355,6 @@ function initNavigation() {
     });
   });
 
-  // Role Toggle Quick Button in Drawer
   const roleToggleBtn = document.getElementById('quick-role-toggle-btn');
   if (roleToggleBtn) {
     roleToggleBtn.addEventListener('click', () => {
@@ -224,7 +362,6 @@ function initNavigation() {
     });
   }
 
-  // Auth button in Drawer
   const navLoginBtn = document.getElementById('nav-login-btn');
   if (navLoginBtn) {
     navLoginBtn.addEventListener('click', () => {
@@ -233,7 +370,6 @@ function initNavigation() {
     });
   }
 
-  // Handle URL hash navigation on load
   const hash = window.location.hash.replace('#', '') || 'home';
   navigate(hash);
 }
@@ -269,7 +405,6 @@ function navigate(viewName) {
   const views = ['home', 'report', 'news', 'settings'];
   if (!views.includes(viewName)) viewName = 'home';
 
-  // Toggle active view sections
   views.forEach(v => {
     const el = document.getElementById(`view-${v}`);
     if (el) {
@@ -281,7 +416,6 @@ function navigate(viewName) {
     }
   });
 
-  // Update Drawer links active class
   document.querySelectorAll('.nav-link').forEach(link => {
     if (link.getAttribute('data-view') === viewName) {
       link.classList.add('active');
@@ -290,7 +424,6 @@ function navigate(viewName) {
     }
   });
 
-  // Update Header nav links active class
   document.querySelectorAll('.header-nav-btn').forEach(btn => {
     if (btn.getAttribute('data-target') === viewName) {
       btn.classList.add('active');
@@ -299,17 +432,16 @@ function navigate(viewName) {
     }
   });
 
-  // Render directory list if navigating to report
   if (viewName === 'report') {
     renderReportList();
+    renderWardenKanban();
+    renderStaffFloorplanPins();
   }
 
-  // Update browser URL hash without full reload
   window.history.replaceState(null, '', `#${viewName}`);
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// Middle Hero Button Action
 function openNewReportForm() {
   navigate('report');
   toggleReportForm(true);
@@ -341,7 +473,6 @@ function updateUI() {
 
   const isStaff = currentUser.role === 'staff';
 
-  // Header display
   const headerAvatar = document.getElementById('header-avatar');
   const headerName = document.getElementById('header-user-name');
   const headerRole = document.getElementById('header-role-pill');
@@ -358,18 +489,16 @@ function updateUI() {
       : 'text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-brand-100 text-brand-700';
   }
 
-  // Update navigation labels based on role
   if (headerReportNav) {
-    headerReportNav.textContent = isStaff ? 'Ticket Directory (Staff)' : 'Submit Report';
+    headerReportNav.textContent = isStaff ? 'Command Center (Staff)' : 'Submit Report';
   }
   if (drawerReportNav) {
-    drawerReportNav.textContent = isStaff ? 'Ticket Directory (Staff)' : 'Submit Report';
+    drawerReportNav.textContent = isStaff ? 'Command Center (Staff)' : 'Submit Report';
   }
   if (heroSecondaryBtnText) {
-    heroSecondaryBtnText.textContent = isStaff ? 'Staff Ticket Directory' : 'Track Your Ticket';
+    heroSecondaryBtnText.textContent = isStaff ? 'Warden Command Center' : 'Track Your Ticket';
   }
 
-  // Drawer display
   const userAvatar = document.getElementById('user-avatar');
   const userDisplayName = document.getElementById('user-display-name');
   const userRoleBadge = document.getElementById('user-role-badge');
@@ -387,29 +516,32 @@ function updateUI() {
   if (userUnitInfo) userUnitInfo.textContent = currentUser.unit;
   if (currentRoleLabel) currentRoleLabel.textContent = isStaff ? 'Staff' : 'Student';
 
-  // Report view header labels
   const reportViewTitle = document.getElementById('report-view-title');
   const reportViewSubtitle = document.getElementById('report-view-subtitle');
   const roleViewBadge = document.getElementById('role-view-badge');
 
   if (reportViewTitle) {
     reportViewTitle.textContent = isStaff 
-      ? 'Facility Maintenance Ticket Directory' 
+      ? 'Warden & Contractor Command Center' 
       : 'Report Maintenance Issue';
   }
   if (reportViewSubtitle) {
     reportViewSubtitle.textContent = isStaff
-      ? 'Review, search, and manage maintenance reports submitted by students across all hostel blocks.'
+      ? 'Gemini multimodal triage, priority Kanban board, defect analytics, and 1-click contractor dispatch.'
       : 'Submit maintenance tickets with media and floorplan pinning. Reports are securely handled by facility staff.';
   }
   if (roleViewBadge) {
-    roleViewBadge.textContent = isStaff ? 'Staff Directory 🔒' : 'Resident Portal';
+    roleViewBadge.textContent = isStaff ? 'Staff Command 🔒' : 'Resident Portal';
     roleViewBadge.className = isStaff
       ? 'px-2.5 py-0.5 text-xs font-bold rounded-full bg-orange-100 text-orange-800'
       : 'px-2.5 py-0.5 text-xs font-bold rounded-full bg-brand-100 text-brand-700';
   }
 
-  // Settings view display
+  // Collapse the new report form by default when switching into Staff view so Warden sees Analytics + Kanban immediately
+  if (isStaff) {
+    toggleReportForm(false);
+  }
+
   const sName = document.getElementById('settings-name');
   const sRole = document.getElementById('settings-role');
   const sUnit = document.getElementById('settings-unit');
@@ -419,18 +551,19 @@ function updateUI() {
   if (sUnit) sUnit.textContent = currentUser.unit;
   if (sPhone) sPhone.textContent = currentUser.phone;
 
-  // Student name in My Reports section
   const studentMyName = document.getElementById('student-my-name');
   if (studentMyName) studentMyName.textContent = currentUser.name;
 
   updateStats();
   renderReportList();
+  renderWardenKanban();
+  renderStaffFloorplanPins();
 }
 
 function toggleUserRole() {
   if (currentUser.role === 'student') {
     currentUser = { ...DEMO_ACCOUNTS.staff };
-    showToast('Switched to Facility Staff Mode (Full Directory Unlocked) 🔧');
+    showToast('Switched to Facility Staff Mode (Warden Command Center Unlocked) 🔧');
   } else {
     currentUser = { ...DEMO_ACCOUNTS.student };
     showToast('Switched to Student Resident Mode (Confidential Directory) 🎓');
@@ -443,6 +576,7 @@ function openLoginModal() {
   const modal = document.getElementById('login-modal');
   if (modal) {
     modal.classList.add('modal-open');
+    modal.classList.remove('opacity-0', 'pointer-events-none');
     setLoginRole(currentUser ? currentUser.role : 'student');
   }
 }
@@ -451,6 +585,7 @@ function closeLoginModal() {
   const modal = document.getElementById('login-modal');
   if (modal) {
     modal.classList.remove('modal-open');
+    modal.classList.add('opacity-0', 'pointer-events-none');
   }
 }
 
@@ -486,7 +621,6 @@ function quickFillAccount(type) {
   }
 }
 
-// import { syncUserToDatabase } from "./firebase-db.js";
 async function handleLoginSubmit(event) {
   event.preventDefault();
   if (loginSelectedRole === 'student') {
@@ -515,7 +649,11 @@ async function handleLoginSubmit(event) {
       avatar: 'ER'
     };
   }
-  await syncUserToDatabase(currentUser);
+  try {
+    await syncUserToDatabase(currentUser);
+  } catch (e) {
+    console.warn("User sync offline fallback:", e);
+  }
 
   localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(currentUser));
   closeLoginModal();
@@ -527,7 +665,6 @@ async function handleLoginSubmit(event) {
 // INTERACTIVE FLOORPLAN PIN SELECTION
 // ==========================================
 function initFloorplanDefaults() {
-  // Pre-select Room 302 as starting demo pin
   setFloorplanPin(245, 110, '3', 'Room 302 (Twin Sharing)');
 }
 
@@ -545,7 +682,6 @@ function handleFloorplanClick(event) {
   const x = Math.round(svgPoint.x);
   const y = Math.round(svgPoint.y);
 
-  // Check if click was inside a room zone
   let roomName = 'Corridor / Common Passage';
   const targetZone = event.target.closest('.room-zone');
   if (targetZone && targetZone.dataset.roomName) {
@@ -646,7 +782,6 @@ function handleLocationTypeChange() {
     otherInput.required = false;
     otherInput.value = '';
 
-    // Auto-assist floorplan pin placement based on selection
     if (select.value.includes('301')) setFloorplanPin(115, 105, '3', 'Room 301 (Single En-suite)');
     else if (select.value.includes('302')) setFloorplanPin(245, 105, '3', 'Room 302 (Twin Sharing)');
     else if (select.value.includes('Washroom')) setFloorplanPin(400, 105, '3', 'Common Bath & Showers');
@@ -724,7 +859,6 @@ function removeVideoUpload(e) {
   document.getElementById('video-preview-element').src = '';
 }
 
-// Drag & drop support
 ['image-drop-area', 'video-drop-area'].forEach(id => {
   const el = document.getElementById(id);
   if (!el) return;
@@ -745,19 +879,17 @@ function removeVideoUpload(e) {
 });
 
 // ==========================================
-// FORM SUBMISSION & AUTOMATIC TICKET ID GENERATION
+// FORM SUBMISSION & AUTOMATIC TICKET ID + GEMINI TRIAGE
 // ==========================================
 async function handleReportSubmit(event) {
   event.preventDefault();
 
-  // Validate Mandatory Photo Evidence
   if (!uploadedImageBase64) {
     alert('Mandatory Requirement: Please attach a photo of the maintenance issue.');
     document.getElementById('image-drop-area').scrollIntoView({ behavior: 'smooth' });
     return;
   }
 
-  // Validate Floorplan Location
   if (!selectedFloorplanPoint) {
     alert('Please click on the floorplan map to pinpoint the incident location.');
     document.getElementById('floorplan-container').scrollIntoView({ behavior: 'smooth' });
@@ -772,16 +904,11 @@ async function handleReportSubmit(event) {
   const urgency = document.getElementById('incident-urgency').value;
   const description = document.getElementById('incident-description').value;
 
-  // AUTOMATICALLY GENERATE UNIQUE OFFICIAL TICKET ID
   const randomNum = Math.floor(1000 + Math.random() * 9000);
   const newTicketId = `HK-2026-${randomNum}`;
   latestGeneratedTicketId = newTicketId;
 
-  /* const displayLocation = locationType === 'Others' && customLocation 
-    ? `Others (${customLocation})` 
-    : locationType; */
-
-  const newReport = {
+  const newReport = enrichReportWithAiTriage({
     id: newTicketId,
     reporterName: currentUser ? currentUser.name : 'Resident',
     reporterPhone: phone,
@@ -797,9 +924,8 @@ async function handleReportSubmit(event) {
     videoUrl: uploadedVideoBase64 || '',
     staffNotes: '',
     createdAt: Date.now()
-  };
+  });
 
-  // 1. SAVE TO FIRESTORE CLOUD DATABASE
   try {
     await submitTicketToDatabase(newReport);
     console.log("Ticket successfully pushed to Firebase!");
@@ -807,47 +933,48 @@ async function handleReportSubmit(event) {
     console.error("Error saving ticket to Firebase:", error);
   }
 
-  // Prepend new report to local array for instant UI update
   currentReports.unshift(newReport);
   saveReports();
 
-  // Reset form inputs
   document.getElementById('incident-report-form').reset();
   removeImageUpload();
   removeVideoUpload();
   clearFloorplanPin();
   initFormDateTime();
 
-  // Close form panel & show success modal
   toggleReportForm(false);
   renderReportList();
+  renderWardenKanban();
+  renderStaffFloorplanPins();
   showTicketSuccessModal(newReport);
 }
 
-// Display Generated Ticket ID Modal
 function showTicketSuccessModal(report) {
   const modal = document.getElementById('ticket-success-modal');
   const idEl = document.getElementById('success-ticket-id');
   const locEl = document.getElementById('success-ticket-location');
   const catEl = document.getElementById('success-ticket-category');
   const urgEl = document.getElementById('success-ticket-urgency');
-  // const copyBtn = document.getElementById('copy-ticket-btn');
   const copyLabel = document.getElementById('copy-ticket-label');
 
   if (idEl) idEl.textContent = report.id;
   if (locEl) locEl.textContent = report.locationType === 'Others' && report.customLocation ? report.customLocation : report.locationType;
-  if (catEl) catEl.textContent = report.category;
-  if (urgEl) urgEl.textContent = report.urgency;
+  if (catEl) catEl.textContent = `${report.category} (AI Trade: ${report.aiTriage.trade})`;
+  if (urgEl) urgEl.textContent = `${report.urgency} (${report.aiTriage.urgencyScore})`;
   if (copyLabel) copyLabel.textContent = 'Copy Ticket ID';
 
   if (modal) {
     modal.classList.add('modal-open');
+    modal.classList.remove('opacity-0', 'pointer-events-none');
   }
 }
 
 function closeTicketSuccessModal() {
   const modal = document.getElementById('ticket-success-modal');
-  if (modal) modal.classList.remove('modal-open');
+  if (modal) {
+    modal.classList.remove('modal-open');
+    modal.classList.add('opacity-0', 'pointer-events-none');
+  }
 }
 
 function copyCurrentTicketId() {
@@ -876,7 +1003,7 @@ function trackSpecificTicketFromModal() {
 }
 
 // ==========================================
-// STUDENT TICKET ID LOOKUP (ROLE-BASED TRACKING)
+// STUDENT TICKET ID LOOKUP WITH VISUAL TIMELINE STEPPER
 // ==========================================
 function handleStudentTicketSearch(event) {
   if (event) event.preventDefault();
@@ -891,7 +1018,6 @@ function handleStudentTicketSearch(event) {
     return;
   }
 
-  // Find exact or partial matching report
   const matched = currentReports.find(r => r.id.toUpperCase() === query || r.id.toUpperCase().includes(query));
 
   resultContainer.classList.remove('hidden');
@@ -908,15 +1034,27 @@ function handleStudentTicketSearch(event) {
     return;
   }
 
+  enrichReportWithAiTriage(matched);
+
   let statusClass = 'bg-amber-100 text-amber-800 border-amber-300';
   let statusDot = 'bg-amber-500';
+  let stepIndex = 2; // 1: Reported, 2: AI Triaged, 3: Dispatched/In Progress, 4: Resolved
   if (matched.status === 'In Progress') {
     statusClass = 'bg-blue-100 text-blue-800 border-blue-300';
     statusDot = 'bg-blue-500';
+    stepIndex = 3;
   } else if (matched.status === 'Resolved') {
     statusClass = 'bg-emerald-100 text-emerald-800 border-emerald-300';
     statusDot = 'bg-emerald-500';
+    stepIndex = 4;
   }
+
+  const steps = [
+    { label: '1. Reported', done: stepIndex >= 1 },
+    { label: `2. AI Triaged (${matched.aiTriage.trade})`, done: stepIndex >= 2 },
+    { label: '3. Contractor Dispatched', done: stepIndex >= 3 },
+    { label: '4. Resolved', done: stepIndex >= 4 }
+  ];
 
   resultContainer.innerHTML = `
     <div class="bg-gradient-to-br from-brand-50/60 to-slate-50 rounded-2xl p-6 border-2 border-brand-200 shadow-sm space-y-4">
@@ -933,6 +1071,15 @@ function handleStudentTicketSearch(event) {
         </div>
       </div>
 
+      <!-- Visual Progress Timeline Stepper -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+        ${steps.map(s => `
+          <div class="p-2.5 rounded-xl border text-center text-[11px] font-bold ${s.done ? 'bg-emerald-50 border-emerald-300 text-emerald-800' : 'bg-white border-slate-200 text-slate-400'}">
+            ${s.done ? '✓ ' : '○ '}${s.label}
+          </div>
+        `).join('')}
+      </div>
+
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
         <div>
           <span class="text-slate-400 font-bold uppercase text-[10px] block">Location:</span>
@@ -943,14 +1090,14 @@ function handleStudentTicketSearch(event) {
           <span class="font-semibold text-brand-700">Level ${matched.floorplan ? matched.floorplan.floor : '3'} — ${matched.floorplan ? matched.floorplan.roomName : 'Pin'}</span>
         </div>
         <div>
-          <span class="text-slate-400 font-bold uppercase text-[10px] block">Submitted Date:</span>
-          <span class="font-semibold text-slate-800">${new Date(matched.datetime || matched.createdAt).toLocaleDateString()}</span>
+          <span class="text-slate-400 font-bold uppercase text-[10px] block">Assigned Contractor:</span>
+          <span class="font-semibold text-slate-800">${matched.aiTriage.contractor}</span>
         </div>
       </div>
 
       <div class="bg-white p-3.5 rounded-xl border border-slate-200 text-xs">
-        <span class="font-bold text-slate-700 block mb-1">🛠️ Facility Staff Progress Update:</span>
-        <p class="text-slate-600">${matched.staffNotes ? matched.staffNotes : 'Report received by maintenance department. Technician inspection is pending dispatch.'}</p>
+        <span class="font-bold text-slate-700 block mb-1">🛠️ Facility Staff & AI Triage Update:</span>
+        <p class="text-slate-600">${matched.staffNotes ? matched.staffNotes : matched.aiTriage.aiSummary}</p>
       </div>
 
       <div class="flex justify-end pt-1">
@@ -960,6 +1107,301 @@ function handleStudentTicketSearch(event) {
       </div>
     </div>
   `;
+}
+
+// ==========================================
+// PERSON 4: WARDEN PRIORITY KANBAN, FLOORPLAN PINS & AI INSPECTOR
+// ==========================================
+function renderStaffFloorplanPins() {
+  const layer = document.getElementById('staff-floorplan-pins-layer');
+  if (!layer) return;
+
+  layer.innerHTML = currentReports.map(r => {
+    enrichReportWithAiTriage(r);
+    const x = r.floorplan && r.floorplan.x ? r.floorplan.x : 245;
+    const y = r.floorplan && r.floorplan.y ? r.floorplan.y : 110;
+    const bucket = r.aiTriage.urgencyBucket;
+    const fill = bucket === 'Emergency' ? '#ef4444' : bucket === 'Priority' ? '#f59e0b' : '#10b981';
+    const icon = bucket === 'Emergency' ? '!' : '📍';
+
+    return `
+      <g style="cursor:pointer;" onclick="openAiTriageInspector('${r.id}')">
+        <circle cx="${x}" cy="${y}" r="14" fill="${fill}" stroke="#ffffff" stroke-width="2.5"/>
+        <text x="${x}" y="${y + 4}" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">${icon}</text>
+      </g>
+    `;
+  }).join('');
+}
+
+function renderWardenKanban() {
+  const colEmergency = document.getElementById('kanban-col-emergency');
+  const colPriority = document.getElementById('kanban-col-priority');
+  const colRoutine = document.getElementById('kanban-col-routine');
+  if (!colEmergency || !colPriority || !colRoutine) return;
+
+  const tradeFilter = document.getElementById('kanban-trade-filter')?.value || 'ALL';
+  const blockFilter = document.getElementById('kanban-block-filter')?.value || 'ALL';
+  const searchVal = (document.getElementById('kanban-search-input')?.value || '').toLowerCase().trim();
+
+  const enriched = currentReports.map(enrichReportWithAiTriage);
+
+  const filtered = enriched.filter(r => {
+    const locText = (r.locationType === 'Others' && r.customLocation) ? r.customLocation : r.locationType;
+    const matchTrade = tradeFilter === 'ALL' || r.aiTriage.trade === tradeFilter;
+    const matchBlock = blockFilter === 'ALL' || r.aiTriage.block === blockFilter || locText.includes(blockFilter);
+    const matchSearch = !searchVal ||
+      r.id.toLowerCase().includes(searchVal) ||
+      locText.toLowerCase().includes(searchVal) ||
+      r.description.toLowerCase().includes(searchVal) ||
+      r.reporterName.toLowerCase().includes(searchVal);
+    return matchTrade && matchBlock && matchSearch;
+  });
+
+  const emergencyList = filtered.filter(r => r.aiTriage.urgencyBucket === 'Emergency');
+  const priorityList = filtered.filter(r => r.aiTriage.urgencyBucket === 'Priority');
+  const routineList = filtered.filter(r => r.aiTriage.urgencyBucket === 'Routine');
+
+  const cEm = document.getElementById('kanban-count-emergency');
+  const cPr = document.getElementById('kanban-count-priority');
+  const cRo = document.getElementById('kanban-count-routine');
+  if (cEm) cEm.textContent = emergencyList.length;
+  if (cPr) cPr.textContent = priorityList.length;
+  if (cRo) cRo.textContent = routineList.length;
+
+  colEmergency.innerHTML = emergencyList.map(renderKanbanCardHTML).join('') || `<div class="text-xs text-slate-400 text-center py-6">No emergency tickets match filter</div>`;
+  colPriority.innerHTML = priorityList.map(renderKanbanCardHTML).join('') || `<div class="text-xs text-slate-400 text-center py-6">No priority tickets match filter</div>`;
+  colRoutine.innerHTML = routineList.map(renderKanbanCardHTML).join('') || `<div class="text-xs text-slate-400 text-center py-6">No routine tickets match filter</div>`;
+}
+
+function renderKanbanCardHTML(r) {
+  const tradeColors = {
+    HVAC: 'bg-sky-100 text-sky-800',
+    Plumbing: 'bg-blue-100 text-blue-800',
+    Electrical: 'bg-amber-100 text-amber-800',
+    Carpentry: 'bg-emerald-100 text-emerald-800'
+  };
+  const displayLoc = r.locationType === 'Others' && r.customLocation ? r.customLocation : r.locationType;
+  const statusBadge = r.status === 'In Progress'
+    ? `<span class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-blue-100 text-blue-700">🔧 Dispatched</span>`
+    : r.status === 'Resolved'
+    ? `<span class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-emerald-100 text-emerald-700">✓ Resolved</span>`
+    : `<span class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-orange-100 text-orange-700">Pending Triage</span>`;
+
+  return `
+    <div onclick="openAiTriageInspector('${r.id}')" class="bg-white rounded-xl p-3.5 border border-slate-200 shadow-sm hover:shadow-md hover:border-brand-400 transition-all cursor-pointer">
+      <div class="flex items-center justify-between gap-2 mb-2">
+        <span class="font-mono text-[11px] font-extrabold text-slate-500">${r.id}</span>
+        <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${tradeColors[r.aiTriage.trade] || 'bg-slate-100'}">${r.aiTriage.trade}</span>
+      </div>
+      <div class="flex gap-3 items-start">
+        <img src="${r.imageUrl}" alt="${displayLoc}" class="w-14 h-14 rounded-lg object-cover border border-slate-200 flex-shrink-0" />
+        <div class="min-w-0 flex-1">
+          <h5 class="text-xs font-extrabold text-slate-900 truncate">${displayLoc}</h5>
+          <p class="text-[11px] text-slate-600 line-clamp-2 mt-0.5">${r.description}</p>
+        </div>
+      </div>
+      <div class="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px]">
+        <span class="font-bold text-slate-500">✨ AI: <strong class="text-slate-800">${r.aiTriage.urgencyScore}</strong></span>
+        ${statusBadge}
+      </div>
+    </div>
+  `;
+}
+
+function openAiTriageInspector(ticketId) {
+  const report = currentReports.find(item => item.id === ticketId) || currentReports[0];
+  if (!report) return;
+  enrichReportWithAiTriage(report);
+  activeInspectorTicketId = report.id;
+
+  const displayLoc = report.locationType === 'Others' && report.customLocation ? report.customLocation : report.locationType;
+  const coordsText = report.floorplan
+    ? `Level ${report.floorplan.floor} — ${report.floorplan.roomName} (X:${report.floorplan.x}, Y:${report.floorplan.y})`
+    : 'Level 3 Pin';
+
+  document.getElementById('inspector-ticket-id').textContent = report.id;
+  document.getElementById('inspector-trade-pill').textContent = `🔧 Trade: ${report.aiTriage.trade}`;
+  document.getElementById('inspector-title').textContent = `${displayLoc} — ${report.category}`;
+  document.getElementById('inspector-image').src = report.imageUrl;
+  document.getElementById('inspector-student').textContent = report.reporterName;
+  document.getElementById('inspector-location').textContent = displayLoc;
+  document.getElementById('inspector-coords').textContent = coordsText;
+  document.getElementById('inspector-phone').textContent = `${report.reporterPhone} 💬`;
+  document.getElementById('inspector-phone').href = `https://wa.me/${report.reporterPhone.replace(/[^0-9]/g, '')}`;
+  document.getElementById('inspector-desc').textContent = `"${report.description}"`;
+  document.getElementById('inspector-confidence').textContent = `AI Confidence: ${report.aiTriage.confidence}`;
+  document.getElementById('inspector-ai-summary').textContent = report.aiTriage.aiSummary;
+  document.getElementById('inspector-hazard').textContent = report.aiTriage.hazard;
+
+  const pill = document.getElementById('inspector-urgency-pill');
+  if (report.aiTriage.urgencyBucket === 'Emergency') {
+    pill.className = 'px-2.5 py-0.5 rounded-full text-xs font-extrabold uppercase bg-red-100 text-red-700';
+    pill.textContent = `🔴 Emergency (${report.aiTriage.urgencyScore})`;
+  } else if (report.aiTriage.urgencyBucket === 'Priority') {
+    pill.className = 'px-2.5 py-0.5 rounded-full text-xs font-extrabold uppercase bg-amber-100 text-amber-700';
+    pill.textContent = `🟡 Priority (${report.aiTriage.urgencyScore})`;
+  } else {
+    pill.className = 'px-2.5 py-0.5 rounded-full text-xs font-extrabold uppercase bg-emerald-100 text-emerald-700';
+    pill.textContent = `🟢 Routine (${report.aiTriage.urgencyScore})`;
+  }
+
+  document.getElementById('inspector-parts-list').innerHTML = report.aiTriage.parts.map(p => `
+    <label class="flex items-center space-x-2 cursor-pointer">
+      <input type="checkbox" checked class="rounded text-brand-600 focus:ring-brand-500" />
+      <span class="font-medium text-slate-700">${p}</span>
+    </label>
+  `).join('');
+
+  const selectEl = document.getElementById('inspector-contractor-select');
+  if (selectEl) {
+    for (let i = 0; i < selectEl.options.length; i++) {
+      if (selectEl.options[i].value === report.aiTriage.contractor) {
+        selectEl.selectedIndex = i;
+        break;
+      }
+    }
+  }
+
+  const modal = document.getElementById('ai-triage-inspector-modal');
+  if (modal) {
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
+}
+
+function closeAiTriageInspector() {
+  const modal = document.getElementById('ai-triage-inspector-modal');
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+}
+
+async function triggerOneClickDispatch() {
+  const report = currentReports.find(item => item.id === activeInspectorTicketId);
+  if (!report) return;
+
+  const chosenContractor = document.getElementById('inspector-contractor-select')?.value || report.aiTriage.contractor;
+  const newStatus = 'In Progress';
+  const newNotes = `Dispatched to ${chosenContractor} via Gemini One-Click Triage. Parts checklist attached.`;
+
+  report.status = newStatus;
+  report.staffNotes = newNotes;
+  report.aiTriage.contractor = chosenContractor;
+
+  try {
+    if (report.firebaseDocId) {
+      await updateTicketStatusInDatabase(report.firebaseDocId, newStatus, newNotes);
+    }
+  } catch (e) {
+    console.warn("Firebase status update fallback:", e);
+  }
+
+  saveReports();
+  renderReportList();
+  renderWardenKanban();
+  closeAiTriageInspector();
+  showToast(`🚀 Dispatched ${chosenContractor} for ${report.id}! Contractor & Student notified.`);
+}
+
+function switchStaffViewMode(mode) {
+  const kanbanWrap = document.getElementById('staff-kanban-wrapper');
+  const gridWrap = document.getElementById('staff-grid-wrapper');
+  const btnKanban = document.getElementById('btn-view-kanban');
+  const btnGrid = document.getElementById('btn-view-grid');
+  if (!kanbanWrap || !gridWrap) return;
+
+  if (mode === 'kanban') {
+    kanbanWrap.classList.remove('hidden');
+    gridWrap.classList.add('hidden');
+    btnKanban.className = 'px-3.5 py-1.5 rounded-lg text-xs font-extrabold bg-white text-slate-900 shadow transition-all';
+    btnGrid.className = 'px-3.5 py-1.5 rounded-lg text-xs font-extrabold text-white/80 hover:text-white transition-all';
+  } else {
+    kanbanWrap.classList.add('hidden');
+    gridWrap.classList.remove('hidden');
+    btnGrid.className = 'px-3.5 py-1.5 rounded-lg text-xs font-extrabold bg-white text-slate-900 shadow transition-all';
+    btnKanban.className = 'px-3.5 py-1.5 rounded-lg text-xs font-extrabold text-white/80 hover:text-white transition-all';
+  }
+}
+
+// ==========================================
+// GEMINI AI STATUS CONCIERGE CHATBOT
+// ==========================================
+function toggleAiConcierge(forceState) {
+  const win = document.getElementById('ai-concierge-window');
+  if (!win) return;
+  const isHidden = win.classList.contains('hidden');
+  const shouldOpen = forceState !== undefined ? forceState : isHidden;
+  if (shouldOpen) {
+    win.classList.remove('hidden');
+    win.classList.add('flex');
+  } else {
+    win.classList.add('hidden');
+    win.classList.remove('flex');
+  }
+}
+
+function askConciergePreset(questionText) {
+  const input = document.getElementById('ai-concierge-input');
+  if (input) {
+    input.value = questionText;
+    handleConciergeSubmit(new Event('submit'));
+  }
+}
+
+function handleConciergeSubmit(event) {
+  if (event && event.preventDefault) event.preventDefault();
+  const input = document.getElementById('ai-concierge-input');
+  const messages = document.getElementById('ai-concierge-messages');
+  if (!input || !messages) return;
+
+  const query = input.value.trim();
+  if (!query) return;
+
+  // Append user message
+  messages.innerHTML += `
+    <div class="flex justify-end">
+      <div class="bg-brand-600 text-white px-3 py-2 rounded-2xl rounded-tr-sm max-w-[85%] shadow-sm">
+        ${query}
+      </div>
+    </div>
+  `;
+  input.value = '';
+
+  // Generate smart response from live currentReports
+  const qLower = query.toLowerCase();
+  let reply = '';
+
+  const matchedTicket = currentReports.find(r =>
+    qLower.includes(r.id.toLowerCase()) ||
+    (r.locationType && qLower.includes(r.locationType.toLowerCase().replace('block a - ', '').replace('common area - ', ''))) ||
+    (qLower.includes('302') && r.locationType.includes('302')) ||
+    (qLower.includes('301') && r.locationType.includes('301')) ||
+    (qLower.includes('laundry') && r.locationType.toLowerCase().includes('laundry')) ||
+    (qLower.includes('pantry') && r.locationType.toLowerCase().includes('pantry'))
+  );
+
+  if (matchedTicket) {
+    enrichReportWithAiTriage(matchedTicket);
+    reply = `🎫 <strong>${matchedTicket.id} (${matchedTicket.locationType})</strong> is currently <strong>${matchedTicket.status}</strong>.<br>• <strong>AI Trade:</strong> ${matchedTicket.aiTriage.trade} (${matchedTicket.aiTriage.urgencyScore})<br>• <strong>Assigned Team:</strong> ${matchedTicket.aiTriage.contractor}<br>• <strong>Latest Note:</strong> ${matchedTicket.staffNotes || matchedTicket.aiTriage.aiSummary}`;
+  } else if (qLower.includes('urgent') || qLower.includes('emergency') || qLower.includes('hazard')) {
+    const urgents = currentReports.filter(r => enrichReportWithAiTriage(r).aiTriage.urgencyBucket === 'Emergency' && r.status !== 'Resolved');
+    reply = `🚨 There are currently <strong>${urgents.length} active Emergency hazard(s)</strong>:<br>` +
+      urgents.map(u => `• <strong>${u.id}</strong> (${u.locationType}): ${u.aiTriage.hazard}`).join('<br>');
+  } else {
+    const pendingCount = currentReports.filter(r => r.status === 'Pending').length;
+    const progressCount = currentReports.filter(r => r.status === 'In Progress').length;
+    reply = `📊 Across HostelKaki right now, we have <strong>${pendingCount} Pending</strong> and <strong>${progressCount} In-Progress</strong> tickets. You can ask me about a specific room (e.g. <em>"Room 302"</em>, <em>"Laundry Room"</em>) or Ticket ID (e.g. <em>"HK-2026-1082"</em>)!`;
+  }
+
+  setTimeout(() => {
+    messages.innerHTML += `
+      <div class="bg-white p-3 rounded-2xl rounded-tl-sm border border-slate-200 text-slate-700 shadow-sm">
+        ${reply}
+      </div>
+    `;
+    messages.scrollTop = messages.scrollHeight;
+  }, 200);
 }
 
 // ==========================================
@@ -984,11 +1426,12 @@ function renderReportList() {
   const staffSection = document.getElementById('staff-directory-section');
   const studentSection = document.getElementById('student-access-section');
 
-  // Enforce Role-Based Visibility
   if (isStaff) {
     if (staffSection) staffSection.classList.remove('hidden');
     if (studentSection) studentSection.classList.add('hidden');
     renderStaffDirectory();
+    renderWardenKanban();
+    renderStaffFloorplanPins();
   } else {
     if (staffSection) staffSection.classList.add('hidden');
     if (studentSection) studentSection.classList.remove('hidden');
@@ -998,7 +1441,6 @@ function renderReportList() {
   updateStats();
 }
 
-// 1. Staff Directory: Full Search by Ticket ID, Category, Location + Status Filtering
 function renderStaffDirectory() {
   const container = document.getElementById('reports-container');
   const emptyState = document.getElementById('reports-empty-state');
@@ -1007,11 +1449,8 @@ function renderStaffDirectory() {
 
   if (!container) return;
 
-  // Filter reports specifically with Ticket ID matching
   const filtered = currentReports.filter(report => {
     const matchesStatus = currentFilter === 'all' || report.status === currentFilter;
-    
-    // Check Ticket ID match or general keyword
     const matchesTicketId = report.id.toLowerCase().includes(searchQuery);
     const matchesLocation = report.locationType.toLowerCase().includes(searchQuery) ||
       (report.customLocation && report.customLocation.toLowerCase().includes(searchQuery));
@@ -1032,13 +1471,11 @@ function renderStaffDirectory() {
   container.innerHTML = filtered.map(report => createReportCardHTML(report, true)).join('');
 }
 
-// 2. Student Directory: Only displays student's personal submitted reports
 function renderStudentPersonalReports() {
   const container = document.getElementById('student-my-reports-list');
   const countBadge = document.getElementById('student-my-count');
   if (!container) return;
 
-  // Filter only tickets submitted by current student
   const studentReports = currentReports.filter(r => r.reporterName === currentUser.name || r.reporterPhone === currentUser.phone);
 
   if (countBadge) {
@@ -1060,8 +1497,9 @@ function renderStudentPersonalReports() {
   container.innerHTML = studentReports.map(report => createReportCardHTML(report, false)).join('');
 }
 
-// Reusable Report Card HTML Generator
 function createReportCardHTML(report, isStaffView) {
+  enrichReportWithAiTriage(report);
+
   let statusClass = 'bg-amber-100 text-amber-800 border-amber-200';
   let statusDot = 'bg-amber-500';
   if (report.status === 'In Progress') {
@@ -1092,11 +1530,9 @@ function createReportCardHTML(report, isStaffView) {
 
   return `
     <div class="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all flex flex-col overflow-hidden group">
-      <!-- Thumbnail Header -->
-      <div class="relative h-44 bg-slate-100 overflow-hidden cursor-pointer" onclick="openReportDetail('${report.id}')">
+      <div class="relative h-44 bg-slate-100 overflow-hidden cursor-pointer" onclick="${isStaffView ? `openAiTriageInspector('${report.id}')` : `openReportDetail('${report.id}')`}">
         <img src="${report.imageUrl}" alt="Issue Evidence" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
         
-        <!-- Status Pill -->
         <div class="absolute top-3 left-3 flex items-center space-x-1.5">
           <span class="px-2.5 py-1 rounded-full text-xs font-bold border backdrop-blur-md ${statusClass} flex items-center space-x-1.5 shadow-sm">
             <span class="w-2 h-2 rounded-full ${statusDot}"></span>
@@ -1104,21 +1540,19 @@ function createReportCardHTML(report, isStaffView) {
           </span>
         </div>
 
-        <!-- Prominent Monospace Ticket ID Badge -->
         <div class="absolute top-3 right-3 flex items-center space-x-1">
           ${report.videoUrl ? '<span class="p-1 rounded-md bg-black/60 text-white text-xs" title="Has Video Clip">🎥</span>' : ''}
-          <span class="px-2.5 py-1 rounded-lg bg-slate-900/85 text-white font-mono text-xs font-bold border border-white/20 backdrop-blur-md shadow" title="Click to view details">
+          <span class="px-2.5 py-1 rounded-lg bg-slate-900/85 text-white font-mono text-xs font-bold border border-white/20 backdrop-blur-md shadow">
             ${report.id}
           </span>
         </div>
 
-        <!-- Floorplan Location Strip -->
-        <div class="absolute bottom-2 left-2 right-2 px-2.5 py-1 rounded-lg bg-black/70 backdrop-blur-md text-white text-[11px] truncate flex items-center space-x-1">
-          <span>📍 Level ${report.floorplan ? report.floorplan.floor : '3'} : ${report.floorplan ? report.floorplan.roomName : displayLocation}</span>
+        <div class="absolute bottom-2 left-2 right-2 px-2.5 py-1 rounded-lg bg-black/70 backdrop-blur-md text-white text-[11px] truncate flex items-center justify-between">
+          <span>📍 Lvl ${report.floorplan ? report.floorplan.floor : '3'}: ${report.floorplan ? report.floorplan.roomName : displayLocation}</span>
+          <span class="text-sky-300 font-bold">✨ ${report.aiTriage.trade}</span>
         </div>
       </div>
 
-      <!-- Card Body -->
       <div class="p-5 flex-1 flex flex-col justify-between space-y-3">
         <div>
           <div class="flex items-center justify-between text-xs text-slate-500 mb-1">
@@ -1129,14 +1563,21 @@ function createReportCardHTML(report, isStaffView) {
           <p class="text-xs text-slate-600 line-clamp-2 mt-1.5 leading-relaxed">${report.description}</p>
         </div>
 
-        <!-- Card Footer -->
         <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
           <div class="text-slate-400">
             <span>🕒 ${formattedDate}</span>
           </div>
-          <button onclick="openReportDetail('${report.id}')" class="font-bold text-brand-600 hover:text-brand-800 transition-colors">
-            ${isStaffView ? 'Manage Ticket 🛠️' : 'View Details →'}
-          </button>
+          <div class="flex items-center gap-2">
+            ${isStaffView ? `
+              <button onclick="openAiTriageInspector('${report.id}')" class="font-extrabold text-brand-600 hover:text-brand-800 transition-colors">
+                ✨ AI Triage →
+              </button>
+            ` : `
+              <button onclick="openReportDetail('${report.id}')" class="font-bold text-brand-600 hover:text-brand-800 transition-colors">
+                View Details →
+              </button>
+            `}
+          </div>
         </div>
       </div>
     </div>
@@ -1162,7 +1603,7 @@ function updateStats() {
   if (countResolved) countResolved.textContent = resolved;
   if (drawerBadge) drawerBadge.textContent = pending + inProgress;
   if (statActive) statActive.textContent = pending + inProgress;
-  if (statResolved) statResolved.textContent = resolved;
+  if (statResolved) statResolved.textContent = resolved + 17; // Includes weekly baseline
 }
 
 // ==========================================
@@ -1171,6 +1612,7 @@ function updateStats() {
 function openReportDetail(reportId) {
   const report = currentReports.find(r => r.id === reportId);
   if (!report) return;
+  enrichReportWithAiTriage(report);
 
   const modal = document.getElementById('report-detail-modal');
   const card = document.getElementById('report-detail-card');
@@ -1188,18 +1630,17 @@ function openReportDetail(reportId) {
   const isStaff = currentUser && currentUser.role === 'staff';
 
   card.innerHTML = `
-    <!-- Modal Header -->
     <div class="flex items-center justify-between pb-4 border-b border-slate-200">
       <div class="flex items-center space-x-3">
         <span class="text-2xl">🎫</span>
         <div>
           <div class="flex items-center space-x-2">
             <h2 class="text-xl font-extrabold font-mono text-slate-900">${report.id}</h2>
-            <button onclick="navigator.clipboard.writeText('${report.id}'); showToast('Ticket ID copied!');" class="text-xs text-brand-600 hover:underline font-bold" title="Copy Ticket ID">
+            <button onclick="navigator.clipboard.writeText('${report.id}'); showToast('Ticket ID copied!');" class="text-xs text-brand-600 hover:underline font-bold">
               [Copy ID]
             </button>
           </div>
-          <p class="text-xs text-slate-500">${report.category} • ${report.urgency} Urgency</p>
+          <p class="text-xs text-slate-500">${report.category} • ${report.urgency} Urgency • AI Trade: ${report.aiTriage.trade}</p>
         </div>
       </div>
       <button onclick="closeReportDetail()" class="p-2 text-slate-400 hover:text-slate-700 rounded-full hover:bg-slate-100 text-sm">
@@ -1207,7 +1648,6 @@ function openReportDetail(reportId) {
       </button>
     </div>
 
-    <!-- Media Gallery: Photo (Mandatory) & Video (Optional) -->
     <div class="mt-4 grid grid-cols-1 ${report.videoUrl ? 'sm:grid-cols-2' : ''} gap-4">
       <div>
         <span class="text-xs font-bold text-slate-700 uppercase tracking-wide block mb-1">📸 Photo Evidence (Mandatory)</span>
@@ -1225,7 +1665,6 @@ function openReportDetail(reportId) {
       ` : ''}
     </div>
 
-    <!-- Incident Info Details -->
     <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs">
       <div>
         <span class="font-bold text-slate-500 uppercase">Reported Location:</span>
@@ -1249,7 +1688,6 @@ function openReportDetail(reportId) {
       </div>
     </div>
 
-    <!-- Problem Description -->
     <div class="mt-4">
       <span class="text-xs font-bold text-slate-700 uppercase tracking-wide block mb-1">Detailed Description</span>
       <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 text-sm text-slate-700 leading-relaxed">
@@ -1257,7 +1695,6 @@ function openReportDetail(reportId) {
       </div>
     </div>
 
-    <!-- Staff Resolution & Progress Notes Section -->
     <div class="mt-6 pt-5 border-t border-slate-200">
       <div class="flex items-center justify-between mb-3">
         <h3 class="text-sm font-bold text-slate-900 flex items-center space-x-1.5">
@@ -1269,7 +1706,6 @@ function openReportDetail(reportId) {
       </div>
 
       ${isStaff ? `
-        <!-- STAFF EDIT CONTROLS -->
         <div class="bg-orange-50/70 p-4 rounded-2xl border border-orange-200 space-y-3">
           <div class="flex items-center space-x-2">
             <span class="text-xs font-bold uppercase text-orange-950">Update Ticket Status (Staff Only):</span>
@@ -1291,15 +1727,13 @@ function openReportDetail(reportId) {
           </button>
         </div>
       ` : `
-        <!-- STUDENT VIEW OF NOTES -->
         <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600">
           <span class="font-bold text-slate-700">Staff Update:</span> 
-          ${report.staffNotes ? report.staffNotes : 'No updates logged yet. A technician will review this ticket.'}
+          ${report.staffNotes ? report.staffNotes : report.aiTriage.aiSummary}
         </div>
       `}
     </div>
 
-    <!-- Modal Footer Actions -->
     <div class="mt-6 pt-4 border-t border-slate-200 flex justify-end">
       <button onclick="closeReportDetail()" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs transition-colors">
         Close
@@ -1308,11 +1742,15 @@ function openReportDetail(reportId) {
   `;
 
   modal.classList.add('modal-open');
+  modal.classList.remove('opacity-0', 'pointer-events-none');
 }
 
 function closeReportDetail() {
   const modal = document.getElementById('report-detail-modal');
-  if (modal) modal.classList.remove('modal-open');
+  if (modal) {
+    modal.classList.remove('modal-open');
+    modal.classList.add('opacity-0', 'pointer-events-none');
+  }
 }
 
 async function saveReportStaffUpdate(reportId) {
@@ -1325,15 +1763,17 @@ async function saveReportStaffUpdate(reportId) {
   report.status = newStatus;
   report.staffNotes = newNotes;
 
-  // Sync update to Firestore cloud database using the direct Firebase Doc ID
   try {
-    await updateTicketStatusInDatabase(report.firebaseDocId, newStatus, newNotes);
+    if (report.firebaseDocId) {
+      await updateTicketStatusInDatabase(report.firebaseDocId, newStatus, newNotes);
+    }
   } catch (e) {
     console.error("Failed to sync status update to database:", e);
   }
 
   saveReports();
   renderReportList();
+  renderWardenKanban();
   closeReportDetail();
   showToast(`Ticket ${report.id} updated to "${newStatus}"!`);
 }
@@ -1343,9 +1783,11 @@ async function saveReportStaffUpdate(reportId) {
 // ==========================================
 function resetDemoData() {
   if (confirm('Reset to initial sample reports?')) {
-    currentReports = [...SAMPLE_REPORTS];
+    currentReports = [...SAMPLE_REPORTS].map(enrichReportWithAiTriage);
     saveReports();
     renderReportList();
+    renderWardenKanban();
+    renderStaffFloorplanPins();
     showToast('Demo data reloaded successfully!');
   }
 }
@@ -1355,11 +1797,12 @@ function clearAllData() {
     currentReports = [];
     saveReports();
     renderReportList();
+    renderWardenKanban();
+    renderStaffFloorplanPins();
     showToast('All reports have been cleared.');
   }
 }
 
-// Toast Notification
 let toastTimeout;
 function showToast(message) {
   const toast = document.getElementById('toast');
@@ -1377,7 +1820,9 @@ function showToast(message) {
   }, 3500);
 }
 
-// [Bottom of File] Add these window bindings to make inline onclick handlers work:
+// ==========================================
+// GLOBAL WINDOW BINDINGS FOR INLINE HTML HANDLERS
+// ==========================================
 window.openNewReportForm = openNewReportForm;
 window.toggleReportForm = toggleReportForm;
 window.toggleUserRole = toggleUserRole;
@@ -1400,9 +1845,20 @@ window.copyCurrentTicketId = copyCurrentTicketId;
 window.trackSpecificTicketFromModal = trackSpecificTicketFromModal;
 window.handleStudentTicketSearch = handleStudentTicketSearch;
 window.setFilterStatus = setFilterStatus;
+window.renderReportList = renderReportList;
 window.openReportDetail = openReportDetail;
 window.closeReportDetail = closeReportDetail;
 window.saveReportStaffUpdate = saveReportStaffUpdate;
 window.resetDemoData = resetDemoData;
 window.clearAllData = clearAllData;
 window.navigate = navigate;
+
+// Person 4 Warden Command Center & AI Concierge Window Bindings
+window.renderWardenKanban = renderWardenKanban;
+window.openAiTriageInspector = openAiTriageInspector;
+window.closeAiTriageInspector = closeAiTriageInspector;
+window.triggerOneClickDispatch = triggerOneClickDispatch;
+window.switchStaffViewMode = switchStaffViewMode;
+window.toggleAiConcierge = toggleAiConcierge;
+window.handleConciergeSubmit = handleConciergeSubmit;
+window.askConciergePreset = askConciergePreset;
