@@ -1,8 +1,15 @@
+initRealtimeTickets
+handleLoginSubmit
+handleReportSubmit
+saveReportStaffUpdate
+
 /**
  * HostelKaki - Residential Maintenance Issue Portal
  * Core Application Logic & State Management
  * Features: Role-Based Visibility (Staff vs Student) & Auto Ticket ID Generation
  */
+
+import { syncUserToDatabase, submitTicketToDatabase, updateTicketStatusInDatabase, listenToTickets } from "./firebase-db.js";
 
 // Initial State & Mock Data Keys
 const APP_STORAGE_KEY = 'hostelkaki_reports_v2';
@@ -115,7 +122,7 @@ let latestGeneratedTicketId = '';
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
   initUser();
-  initReports();
+  initRealtimeTickets();
   initFormDateTime();
   initNavigation();
   initFloorplanDefaults();
@@ -136,19 +143,27 @@ function initUser() {
   }
 }
 
-// Setup Reports Data
-function initReports() {
-  const savedReports = localStorage.getItem(APP_STORAGE_KEY);
-  if (savedReports) {
-    try {
-      currentReports = JSON.parse(savedReports);
-    } catch (e) {
-      currentReports = [...SAMPLE_REPORTS];
+/**
+ * Setup Reports Data
+ * Initializes real-time Firestore synchronization on app load.
+ * Replaces static fetching so the UI updates automatically on changes.
+ */
+function initRealtimeTickets() {
+  // Start listening to live cloud updates
+  listenToTickets((cloudTickets) => {
+    if (cloudTickets && cloudTickets.length > 0) {
+      currentReports = cloudTickets;
+    } else {
+      // Fallback to local storage or sample data if cloud database is empty
+      const localReports = localStorage.getItem(APP_STORAGE_KEY);
+      currentReports = localReports ? JSON.parse(localReports) : [...SAMPLE_REPORTS];
     }
-  } else {
-    currentReports = [...SAMPLE_REPORTS];
-    saveReports();
-  }
+    
+    // Refresh statistics and UI elements automatically on every cloud update
+    updateStats();
+    renderReportList();
+    console.log("Real-time sync: UI updated with latest cloud tickets.");
+  });
 }
 
 function saveReports() {
@@ -471,7 +486,8 @@ function quickFillAccount(type) {
   }
 }
 
-function handleLoginSubmit(event) {
+// import { syncUserToDatabase } from "./firebase-db.js";
+async function handleLoginSubmit(event) {
   event.preventDefault();
   if (loginSelectedRole === 'student') {
     const name = document.getElementById('login-student-name').value || 'Alex Tan';
@@ -499,6 +515,7 @@ function handleLoginSubmit(event) {
       avatar: 'ER'
     };
   }
+  await syncUserToDatabase(currentUser);
 
   localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(currentUser));
   closeLoginModal();
@@ -730,7 +747,7 @@ function removeVideoUpload(e) {
 // ==========================================
 // FORM SUBMISSION & AUTOMATIC TICKET ID GENERATION
 // ==========================================
-function handleReportSubmit(event) {
+async function handleReportSubmit(event) {
   event.preventDefault();
 
   // Validate Mandatory Photo Evidence
@@ -760,9 +777,9 @@ function handleReportSubmit(event) {
   const newTicketId = `HK-2026-${randomNum}`;
   latestGeneratedTicketId = newTicketId;
 
-  const displayLocation = locationType === 'Others' && customLocation 
+  /* const displayLocation = locationType === 'Others' && customLocation 
     ? `Others (${customLocation})` 
-    : locationType;
+    : locationType; */
 
   const newReport = {
     id: newTicketId,
@@ -782,7 +799,15 @@ function handleReportSubmit(event) {
     createdAt: Date.now()
   };
 
-  // Prepend new report to top of database
+  // 1. SAVE TO FIRESTORE CLOUD DATABASE
+  try {
+    await submitTicketToDatabase(newReport);
+    console.log("Ticket successfully pushed to Firebase!");
+  } catch (error) {
+    console.error("Error saving ticket to Firebase:", error);
+  }
+
+  // Prepend new report to local array for instant UI update
   currentReports.unshift(newReport);
   saveReports();
 
@@ -793,11 +818,9 @@ function handleReportSubmit(event) {
   clearFloorplanPin();
   initFormDateTime();
 
-  // Close form panel
+  // Close form panel & show success modal
   toggleReportForm(false);
   renderReportList();
-
-  // POP UP THE OFFICIAL TICKET SUCCESS RECEIPT MODAL
   showTicketSuccessModal(newReport);
 }
 
@@ -808,7 +831,7 @@ function showTicketSuccessModal(report) {
   const locEl = document.getElementById('success-ticket-location');
   const catEl = document.getElementById('success-ticket-category');
   const urgEl = document.getElementById('success-ticket-urgency');
-  const copyBtn = document.getElementById('copy-ticket-btn');
+  // const copyBtn = document.getElementById('copy-ticket-btn');
   const copyLabel = document.getElementById('copy-ticket-label');
 
   if (idEl) idEl.textContent = report.id;
@@ -1292,7 +1315,7 @@ function closeReportDetail() {
   if (modal) modal.classList.remove('modal-open');
 }
 
-function saveReportStaffUpdate(reportId) {
+async function saveReportStaffUpdate(reportId) {
   const report = currentReports.find(r => r.id === reportId);
   if (!report) return;
 
@@ -1301,6 +1324,13 @@ function saveReportStaffUpdate(reportId) {
 
   report.status = newStatus;
   report.staffNotes = newNotes;
+
+  // Sync update to Firestore cloud database using the direct Firebase Doc ID
+  try {
+    await updateTicketStatusInDatabase(report.firebaseDocId, newStatus, newNotes);
+  } catch (e) {
+    console.error("Failed to sync status update to database:", e);
+  }
 
   saveReports();
   renderReportList();
@@ -1346,3 +1376,33 @@ function showToast(message) {
     toast.classList.add('translate-y-20', 'opacity-0');
   }, 3500);
 }
+
+// [Bottom of File] Add these window bindings to make inline onclick handlers work:
+window.openNewReportForm = openNewReportForm;
+window.toggleReportForm = toggleReportForm;
+window.toggleUserRole = toggleUserRole;
+window.openLoginModal = openLoginModal;
+window.closeLoginModal = closeLoginModal;
+window.setLoginRole = setLoginRole;
+window.quickFillAccount = quickFillAccount;
+window.handleLoginSubmit = handleLoginSubmit;
+window.handleFloorplanClick = handleFloorplanClick;
+window.clearFloorplanPin = clearFloorplanPin;
+window.changeFloorplanLevel = changeFloorplanLevel;
+window.handleLocationTypeChange = handleLocationTypeChange;
+window.handleImageSelect = handleImageSelect;
+window.removeImageUpload = removeImageUpload;
+window.handleVideoSelect = handleVideoSelect;
+window.removeVideoUpload = removeVideoUpload;
+window.handleReportSubmit = handleReportSubmit;
+window.closeTicketSuccessModal = closeTicketSuccessModal;
+window.copyCurrentTicketId = copyCurrentTicketId;
+window.trackSpecificTicketFromModal = trackSpecificTicketFromModal;
+window.handleStudentTicketSearch = handleStudentTicketSearch;
+window.setFilterStatus = setFilterStatus;
+window.openReportDetail = openReportDetail;
+window.closeReportDetail = closeReportDetail;
+window.saveReportStaffUpdate = saveReportStaffUpdate;
+window.resetDemoData = resetDemoData;
+window.clearAllData = clearAllData;
+window.navigate = navigate;
