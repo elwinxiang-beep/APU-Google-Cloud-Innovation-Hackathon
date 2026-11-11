@@ -1,0 +1,114 @@
+/* HostelKaki Custom Styles */
+
+/* Subtle Glassmorphism and Backdrop Blur */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Floating Navigation Drawer Open Button Styling */
+#sidebar-open-btn {
+  box-shadow: 0 10px 25px -5px rgba(21, 121, 245, 0.4), 0 8px 10px -6px rgba(21, 121, 245, 0.2);
+  animation: gentle-nudge 4s infinite ease-in-out;
+}
+
+@keyframes gentle-nudge {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(4px);
+  }
+}
+
+/* Nav Link Active state */
+.nav-link.active {
+  background-color: #eef8ff;
+  color: #0e60e1;
+  font-weight: 700;
+}
+
+.nav-link.active svg {
+  color: #0e60e1;
+}
+
+.header-nav-btn.active {
+  color: #0e60e1;
+  background-color: #f1f5f9;
+  font-weight: 700;
+}
+
+/* Status Filter Buttons */
+.status-filter-btn {
+  border-color: #e2e8f0;
+  background-color: #f8fafc;
+  color: #64748b;
+}
+
+.status-filter-btn:hover {
+  background-color: #f1f5f9;
+  color: #334155;
+}
+
+.status-filter-btn.active {
+  background-color: #0f172a;
+  color: #ffffff;
+  border-color: #0f172a;
+}
+
+/* Interactive SVG Floorplan styling */
+.room-zone {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.room-zone rect {
+  transition: fill 0.2s ease, stroke 0.2s ease, stroke-width 0.2s ease;
+}
+
+.room-zone:hover rect {
+  stroke-width: 2.5;
+  filter: brightness(1.2);
+}
+
+#floorplan-pin {
+  pointer-events: none;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  background-clip: padding-box;
+  border: 2px solid transparent;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Drag over visual feedback */
+.drag-over {
+  border-color: #2b98ff !important;
+  background-color: #d9f0ff !important;
+}
+
+/* Modal Open Animation */
+.modal-open {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+.modal-open > div {
+  transform: scale(1) !important;
+}
