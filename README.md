@@ -6,7 +6,7 @@ HostelKaki is a modern web application tailored for student residential hostels 
 
 ---
 
-## 🌟 Key Updates & Features
+# 🌟1. Key Updates & Features
 
 ### 1. 🔒 Role-Based Visibility (Staff vs. Student)
 - **Only Facility Staff can view the full maintenance directory**:
@@ -67,3 +67,13 @@ Use the **Switch Account** button (or drawer quick toggle):
    - Unlock the full directory!
    - Search by the Ticket ID in the search bar.
    - Change the status from `Pending` → `In Progress` → `Resolved` and add technician notes.
+
+# 🗂️2. Project File Structure
+
+```text
+HostelKaki/
+├── index.html        # Unified Single-Page Application (Home, Report Form, Student Tracker, Warden Command Center & Modals)
+├── app.js            # Core state management, Firebase real-time sync, Gemini AI Triage engine, Kanban & Concierge logic
+├── styles.css        # Custom utility styles, animations, and modal transitions
+├── firebase-db.js    # Firebase Firestore cloud database configuration & real-time listeners
+└── README.md         # Project documentation & hackathon guide
