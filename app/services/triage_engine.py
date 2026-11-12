@@ -3,6 +3,8 @@ import io
 import json
 import logging
 import re
+import sys
+import traceback
 from typing import Optional, Tuple
 from PIL import Image
 from google.genai import types
@@ -69,8 +71,24 @@ class TriageEngine:
                     location=location
                 )
             except Exception as e:
-                logger.error(f"Live Gemini API call failed: {e}. Executing fallback heuristic triage.")
-                return self._fallback_triage(description, image_bytes, location)
+                err_tb = traceback.format_exc()
+                err_msg = (
+                    f"============================================================\n"
+                    f"❌ [CRITICAL] LIVE GEMINI API CALL FAILED!\n"
+                    f"Model: {gemini_manager.model_name}\n"
+                    f"Exception Type: {type(e).__name__}\n"
+                    f"Exception Details: {e}\n"
+                    f"Traceback:\n{err_tb}"
+                    f"============================================================"
+                )
+                logger.error(err_msg)
+                print(f"\n{err_msg}\n⚠️ Fallback heuristic triage triggered due to live API failure.\n", file=sys.stderr)
+                
+                fallback_res = self._fallback_triage(description, image_bytes, location)
+                fallback_res.reasoning_hazards = (
+                    f"[Notice: Live Gemini API call encountered {type(e).__name__}: {e}] " + fallback_res.reasoning_hazards
+                )
+                return fallback_res
         else:
             return self._fallback_triage(description, image_bytes, location)
 
@@ -110,6 +128,15 @@ class TriageEngine:
         )
 
         response_text = response.text.strip()
+        # Clean any potential markdown code fences if returned
+        if response_text.startswith("```json"):
+            response_text = response_text[7:]
+        elif response_text.startswith("```"):
+            response_text = response_text[3:]
+        if response_text.endswith("```"):
+            response_text = response_text[:-3]
+        response_text = response_text.strip()
+
         data = json.loads(response_text)
         result = TriageResult.model_validate(data)
 
