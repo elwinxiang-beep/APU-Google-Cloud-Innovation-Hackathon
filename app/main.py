@@ -22,13 +22,15 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Enable CORS for local client development
+# Enable CORS for local client development & frontend teammates (localhost:3000, 5173, etc.)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
+    allow_origin_regex=r"https?://.*",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 # Include API routes
