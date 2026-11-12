@@ -1596,17 +1596,39 @@
       const locType = locTypeEl ? locTypeEl.value : "ALL";
 
       const filtered = tickets.filter(t => {
+        const idStr = String(t.id || "").toLowerCase();
+        const locStr = String(t.locationName || "").toLowerCase();
+        const descStr = String(t.description || "").toLowerCase();
+        const phoneStr = String(t.phone || "").toLowerCase();
+        const nameStr = String(t.studentName || "").toLowerCase();
+        const catStr = String(t.category || "").toLowerCase();
+
         const matchesSearch =
-          t.id.toLowerCase().includes(search) ||
-          t.locationName.toLowerCase().includes(search) ||
-          t.description.toLowerCase().includes(search) ||
-          t.phone.toLowerCase().includes(search) ||
-          t.studentName.toLowerCase().includes(search) ||
-          t.category.toLowerCase().includes(search);
-        const matchesUrgency = urgency === "ALL" || t.urgency === urgency;
-        const matchesCat = category === "ALL" || t.category === category;
+          !search ||
+          idStr.includes(search) ||
+          locStr.includes(search) ||
+          descStr.includes(search) ||
+          phoneStr.includes(search) ||
+          nameStr.includes(search) ||
+          catStr.includes(search);
+
+        const matchesUrgency =
+          urgency === "ALL" ||
+          String(t.urgency || "").toLowerCase() === urgency.toLowerCase();
+
+        // Smart category match so "Plumbing & Water Leak" matches "Plumbing & Water",
+        // "Air Conditioning (HVAC)" matches "Air Conditioning", etc.
+        const selectedCatLower = category.toLowerCase();
+        const matchesCat =
+          category === "ALL" ||
+          catStr === selectedCatLower ||
+          catStr.includes(selectedCatLower) ||
+          selectedCatLower.includes(catStr) ||
+          (selectedCatLower.includes("carpentry") && (catStr.includes("door") || catStr.includes("furniture")));
+
         const matchesLoc = locType === "ALL" || t.locationType === locType;
         const matchesPin = selectedFilterId === "ALL" || t.id === selectedFilterId;
+
         return matchesSearch && matchesUrgency && matchesCat && matchesLoc && matchesPin;
       });
 
@@ -1745,11 +1767,17 @@
     initializeStaffNavigation();
     initStaffRealtimeTickets();
 
+    window.renderDirectory = renderDirectory;
     window.openInspectModal = openInspectModal;
     window.closeInspectModal = closeInspectModal;
     window.saveDispatchUpdate = saveDispatchUpdate;
     window.filterByPin = filterByPin;
     window.changeStaffFloor = changeStaffFloor;
+
+    document.getElementById("searchInput")?.addEventListener("input", renderDirectory);
+    document.getElementById("urgencyFilter")?.addEventListener("change", renderDirectory);
+    document.getElementById("categoryFilter")?.addEventListener("change", renderDirectory);
+    document.getElementById("locationTypeFilter")?.addEventListener("change", renderDirectory);
   </script>
 </body>
 </html>
