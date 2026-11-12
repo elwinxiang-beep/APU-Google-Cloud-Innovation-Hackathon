@@ -884,6 +884,9 @@ function removeVideoUpload(e) {
 async function handleReportSubmit(event) {
   event.preventDefault();
 
+  // 1. Grab the submit button to lock it against spam clicks
+  const submitBtn = event.submitter || event.target.querySelector('button[type="submit"]');
+
   if (!uploadedImageBase64) {
     alert('Mandatory Requirement: Please attach a photo of the maintenance issue.');
     document.getElementById('image-drop-area').scrollIntoView({ behavior: 'smooth' });
@@ -927,26 +930,42 @@ async function handleReportSubmit(event) {
   });
 
   try {
+    // 2. Disable button and show loading state
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.dataset.originalText = submitBtn.innerHTML;
+      submitBtn.innerHTML = `<span>Submitting Ticket...</span>`;
+    }
+
+    // 3. Push to Firebase (using setDoc ID matching newTicketId to prevent duplicates)
     await submitTicketToDatabase(newReport);
     console.log("Ticket successfully pushed to Firebase!");
+
+    currentReports.unshift(newReport);
+    saveReports();
+
+    document.getElementById('incident-report-form').reset();
+    removeImageUpload();
+    removeVideoUpload();
+    clearFloorplanPin();
+    initFormDateTime();
+
+    toggleReportForm(false);
+    renderReportList();
+    renderWardenKanban();
+    renderStaffFloorplanPins();
+    showTicketSuccessModal(newReport);
+
   } catch (error) {
     console.error("Error saving ticket to Firebase:", error);
+    alert("Error submitting ticket to cloud database. Please try again.");
+  } finally {
+    // 4. Always re-enable the button once finished
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = submitBtn.dataset.originalText || '<span>Submit Maintenance Ticket</span>';
+    }
   }
-
-  currentReports.unshift(newReport);
-  saveReports();
-
-  document.getElementById('incident-report-form').reset();
-  removeImageUpload();
-  removeVideoUpload();
-  clearFloorplanPin();
-  initFormDateTime();
-
-  toggleReportForm(false);
-  renderReportList();
-  renderWardenKanban();
-  renderStaffFloorplanPins();
-  showTicketSuccessModal(newReport);
 }
 
 function showTicketSuccessModal(report) {
@@ -1219,38 +1238,46 @@ function openAiTriageInspector(ticketId) {
     ? `Level ${report.floorplan.floor} — ${report.floorplan.roomName} (X:${report.floorplan.x}, Y:${report.floorplan.y})`
     : 'Level 3 Pin';
 
-  document.getElementById('inspector-ticket-id').textContent = report.id;
-  document.getElementById('inspector-trade-pill').textContent = `🔧 Trade: ${report.aiTriage.trade}`;
-  document.getElementById('inspector-title').textContent = `${displayLoc} — ${report.category}`;
-  document.getElementById('inspector-image').src = report.imageUrl;
-  document.getElementById('inspector-student').textContent = report.reporterName;
-  document.getElementById('inspector-location').textContent = displayLoc;
-  document.getElementById('inspector-coords').textContent = coordsText;
-  document.getElementById('inspector-phone').textContent = `${report.reporterPhone} 💬`;
-  document.getElementById('inspector-phone').href = `https://wa.me/${report.reporterPhone.replace(/[^0-9]/g, '')}`;
-  document.getElementById('inspector-desc').textContent = `"${report.description}"`;
-  document.getElementById('inspector-confidence').textContent = `AI Confidence: ${report.aiTriage.confidence}`;
-  document.getElementById('inspector-ai-summary').textContent = report.aiTriage.aiSummary;
-  document.getElementById('inspector-hazard').textContent = report.aiTriage.hazard;
+  const setElText = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
+  const setElAttr = (id, attr, val) => { const el = document.getElementById(id); if (el) el[attr] = val; };
+
+  setElText('inspector-ticket-id', report.id);
+  setElText('inspector-trade-pill', `🔧 Trade: ${report.aiTriage.trade}`);
+  setElText('inspector-title', `${displayLoc} — ${report.category}`);
+  setElAttr('inspector-image', 'src', report.imageUrl);
+  setElText('inspector-student', report.reporterName);
+  setElText('inspector-location', displayLoc);
+  setElText('inspector-coords', coordsText);
+  setElText('inspector-phone', `${report.reporterPhone} 💬`);
+  setElAttr('inspector-phone', 'href', `https://wa.me/${report.reporterPhone.replace(/[^0-9]/g, '')}`);
+  setElText('inspector-desc', `"${report.description}"`);
+  setElText('inspector-confidence', `AI Confidence: ${report.aiTriage.confidence}`);
+  setElText('inspector-ai-summary', report.aiTriage.aiSummary);
+  setElText('inspector-hazard', report.aiTriage.hazard);
 
   const pill = document.getElementById('inspector-urgency-pill');
-  if (report.aiTriage.urgencyBucket === 'Emergency') {
-    pill.className = 'px-2.5 py-0.5 rounded-full text-xs font-extrabold uppercase bg-red-100 text-red-700';
-    pill.textContent = `🔴 Emergency (${report.aiTriage.urgencyScore})`;
-  } else if (report.aiTriage.urgencyBucket === 'Priority') {
-    pill.className = 'px-2.5 py-0.5 rounded-full text-xs font-extrabold uppercase bg-amber-100 text-amber-700';
-    pill.textContent = `🟡 Priority (${report.aiTriage.urgencyScore})`;
-  } else {
-    pill.className = 'px-2.5 py-0.5 rounded-full text-xs font-extrabold uppercase bg-emerald-100 text-emerald-700';
-    pill.textContent = `🟢 Routine (${report.aiTriage.urgencyScore})`;
+  if (pill) {
+    if (report.aiTriage.urgencyBucket === 'Emergency') {
+      pill.className = 'px-2.5 py-0.5 rounded-full text-xs font-extrabold uppercase bg-red-100 text-red-700';
+      pill.textContent = `🔴 Emergency (${report.aiTriage.urgencyScore})`;
+    } else if (report.aiTriage.urgencyBucket === 'Priority') {
+      pill.className = 'px-2.5 py-0.5 rounded-full text-xs font-extrabold uppercase bg-amber-100 text-amber-700';
+      pill.textContent = `🟡 Priority (${report.aiTriage.urgencyScore})`;
+    } else {
+      pill.className = 'px-2.5 py-0.5 rounded-full text-xs font-extrabold uppercase bg-emerald-100 text-emerald-700';
+      pill.textContent = `🟢 Routine (${report.aiTriage.urgencyScore})`;
+    }
   }
 
-  document.getElementById('inspector-parts-list').innerHTML = report.aiTriage.parts.map(p => `
-    <label class="flex items-center space-x-2 cursor-pointer">
-      <input type="checkbox" checked class="rounded text-brand-600 focus:ring-brand-500" />
-      <span class="font-medium text-slate-700">${p}</span>
-    </label>
-  `).join('');
+  const partsList = document.getElementById('inspector-parts-list');
+  if (partsList) {
+    partsList.innerHTML = report.aiTriage.parts.map(p => `
+      <label class="flex items-center space-x-2 cursor-pointer">
+        <input type="checkbox" checked class="rounded text-brand-600 focus:ring-brand-500" />
+        <span class="font-medium text-slate-700">${p}</span>
+      </label>
+    `).join('');
+  }
 
   const selectEl = document.getElementById('inspector-contractor-select');
   if (selectEl) {
@@ -1262,18 +1289,19 @@ function openAiTriageInspector(ticketId) {
     }
   }
 
+  // Open modal using opacity & pointer-events transition
   const modal = document.getElementById('ai-triage-inspector-modal');
   if (modal) {
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
+    modal.classList.remove('opacity-0', 'pointer-events-none');
+    modal.classList.add('opacity-100', 'pointer-events-auto');
   }
 }
 
 function closeAiTriageInspector() {
   const modal = document.getElementById('ai-triage-inspector-modal');
   if (modal) {
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
+    modal.classList.remove('opacity-100', 'pointer-events-auto');
+    modal.classList.add('opacity-0', 'pointer-events-none');
   }
 }
 
@@ -1584,26 +1612,32 @@ function createReportCardHTML(report, isStaffView) {
   `;
 }
 
-function updateStats() {
+export function updateStats() {
   const countAll = document.getElementById('count-all');
   const countPending = document.getElementById('count-pending');
   const countProgress = document.getElementById('count-progress');
   const countResolved = document.getElementById('count-resolved');
   const drawerBadge = document.getElementById('report-count-badge');
-  const statActive = document.getElementById('stat-active');
-  const statResolved = document.getElementById('stat-resolved');
+  
+  // Support both index.html and staff portal element ID conventions
+  const statActive = document.getElementById('stat-active') || document.getElementById('statPending');
+  const statResolved = document.getElementById('stat-resolved') || document.getElementById('statResolved');
+  const statUrgent = document.getElementById('statUrgent');
 
   const pending = currentReports.filter(r => r.status === 'Pending').length;
   const inProgress = currentReports.filter(r => r.status === 'In Progress').length;
   const resolved = currentReports.filter(r => r.status === 'Resolved').length;
+  const urgent = currentReports.filter(r => r.urgency === 'Urgent' && r.status !== 'Resolved').length;
 
   if (countAll) countAll.textContent = currentReports.length;
   if (countPending) countPending.textContent = pending;
   if (countProgress) countProgress.textContent = inProgress;
   if (countResolved) countResolved.textContent = resolved;
   if (drawerBadge) drawerBadge.textContent = pending + inProgress;
+
   if (statActive) statActive.textContent = pending + inProgress;
-  if (statResolved) statResolved.textContent = resolved + 17; // Includes weekly baseline
+  if (statResolved) statResolved.textContent = resolved;
+  if (statUrgent) statUrgent.textContent = urgent;
 }
 
 // ==========================================
@@ -1757,15 +1791,19 @@ async function saveReportStaffUpdate(reportId) {
   const report = currentReports.find(r => r.id === reportId);
   if (!report) return;
 
-  const newStatus = document.getElementById('modal-status-select').value;
-  const newNotes = document.getElementById('modal-staff-notes').value;
+  const newStatus = document.getElementById('modalStatus').value; // e.g., "Resolved"
+  const newNotes = document.getElementById('modal-staff-notes')?.value || 'Updated via Staff Portal';
 
   report.status = newStatus;
   report.staffNotes = newNotes;
 
   try {
+    // Crucial: Check if firebaseDocId exists for Firestore sync
     if (report.firebaseDocId) {
       await updateTicketStatusInDatabase(report.firebaseDocId, newStatus, newNotes);
+      console.log("Synced update successfully to Firebase!");
+    } else {
+      console.warn("firebaseDocId missing; updated locally only.");
     }
   } catch (e) {
     console.error("Failed to sync status update to database:", e);
@@ -1774,7 +1812,6 @@ async function saveReportStaffUpdate(reportId) {
   saveReports();
   renderReportList();
   renderWardenKanban();
-  closeReportDetail();
   showToast(`Ticket ${report.id} updated to "${newStatus}"!`);
 }
 

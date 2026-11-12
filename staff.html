@@ -655,18 +655,26 @@
 
     .btn-action:hover { background: #1d6bf3; color: #fff; }
 
+    /* 🚀 Smooth Modal Animation Styles Matching index.html */
     .modal-backdrop {
       position: fixed;
       inset: 0;
       background: rgba(15, 23, 42, 0.6);
-      display: none;
+      backdrop-filter: blur(4px);
+      display: flex;
       align-items: center;
       justify-content: center;
       padding: 20px;
       z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease-in-out;
     }
 
-    .modal-backdrop.open { display: flex; }
+    .modal-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
 
     .modal-content {
       background: #ffffff;
@@ -674,9 +682,16 @@
       max-width: 860px;
       max-height: 92vh;
       overflow-y: auto;
-      border-radius: 18px;
+      border-radius: 24px;
       padding: 28px 32px;
       box-shadow: 0 25px 50px -12px rgba(0,0,0,0.35);
+      border: 1px solid #e2e8f0;
+      transform: scale(0.95);
+      transition: transform 0.3s ease-in-out;
+    }
+
+    .modal-backdrop.open .modal-content {
+      transform: scale(1);
     }
 
     .form-row-2 {
@@ -1051,11 +1066,6 @@
       box-shadow: 0 4px 14px rgba(255, 107, 53, 0.25);
     }
 
-    .modal-content {
-      border-radius: 24px;
-      border: 1px solid #e2e8f0;
-    }
-
     @media (max-width: 600px) {
       .navbar-content { padding: 0 16px; gap: 8px; }
       .staff-quick-nav { display: none; }
@@ -1189,7 +1199,7 @@
         <p>Resolved This Week</p>
       </div>
       <div class="stat-item">
-        <h3 class="stat-blue">&lt; 4 hrs</h3>
+        <h3 class="stat-blue">< 4 hrs</h3>
         <p>Average Response</p>
       </div>
     </div>
@@ -1307,9 +1317,13 @@
     </div>
   </div>
 
-  <script>
+  <script type="module">
+    import { updateTicketStatusInDatabase, listenToTickets } from "./firebase-db.js";
+
     const APP_REPORTS_KEY = "hostelkaki_reports_v2";
     const APP_USER_KEY = "hostelkaki_active_user_v2";
+    let selectedFilterId = "ALL";
+    let tickets = [];
 
     function getStoredArray(key) {
       const storedValue = localStorage.getItem(key);
@@ -1484,7 +1498,8 @@
         : locationType;
 
       return {
-        id: report.id,
+        firebaseDocId: report.firebaseDocId,
+        id: report.id || report.ticketId,
         studentName: report.reporterName || "Resident",
         phone: report.reporterPhone || "",
         dateTime: (report.datetime || "").replace("T", " "),
@@ -1510,47 +1525,82 @@
       };
     }
 
-    const storedReports = getStoredArray(APP_REPORTS_KEY);
-    const usingSharedReports = storedReports !== null;
-    const legacyTickets = getStoredArray("hostelkaki_tickets");
-    let tickets = usingSharedReports
-      ? storedReports.map(reportToTicket)
-      : legacyTickets || defaultTickets;
-    let selectedFilterId = "ALL";
-
-    function saveTickets() {
-      if (usingSharedReports) {
-        const reports = getStoredArray(APP_REPORTS_KEY);
-        if (reports === null) {
-          throw new Error("The resident report list could not be loaded.");
+    function initStaffRealtimeTickets() {
+      listenToTickets((cloudTickets) => {
+        if (cloudTickets && cloudTickets.length > 0) {
+          tickets = cloudTickets.map(reportToTicket);
+        } else {
+          const storedReports = getStoredArray(APP_REPORTS_KEY);
+          tickets = storedReports ? storedReports.map(reportToTicket) : defaultTickets;
         }
 
-        tickets.forEach(ticket => {
-          const report = reports.find(item => item.id === ticket.id);
-          if (!report) return;
-          report.status = ticket.status === "RESOLVED"
-            ? "Resolved"
-            : ticket.status === "DISPATCHED" ? "In Progress" : "Pending";
-          report.contractor = ticket.contractor;
-        });
-        localStorage.setItem(APP_REPORTS_KEY, JSON.stringify(reports));
-      } else {
-        localStorage.setItem("hostelkaki_tickets", JSON.stringify(tickets));
+        selectedFilterId = "ALL";
+        updateStats(tickets);
+        renderFloorplanPins();
+        renderDirectory();
+      });
+    }
+
+    function saveTickets() {
+      try {
+        const storedReports = getStoredArray(APP_REPORTS_KEY);
+        if (storedReports !== null) {
+          tickets.forEach(ticket => {
+            const report = storedReports.find(item => item.id === ticket.id);
+            if (!report) return;
+            report.status = ticket.status === "RESOLVED"
+              ? "Resolved"
+              : ticket.status === "DISPATCHED" ? "In Progress" : "Pending";
+            report.contractor = ticket.contractor;
+          });
+          localStorage.setItem(APP_REPORTS_KEY, JSON.stringify(storedReports));
+        } else {
+          localStorage.setItem("hostelkaki_tickets", JSON.stringify(tickets));
+        }
+      } catch (e) {
+        console.error("Local save error:", e);
       }
       updateStats();
     }
 
-    function updateStats() {
-      const pending = tickets.filter(t => t.status !== "RESOLVED").length;
-      const urgent = tickets.filter(t => t.urgency === "Urgent" && t.status !== "RESOLVED").length;
-      const resolved = tickets.filter(t => t.status === "RESOLVED").length;
-      document.getElementById("statPending").textContent = pending;
-      document.getElementById("statUrgent").textContent = urgent;
-      document.getElementById("statResolved").textContent = resolved;
+    function updateStats(ticketsArray) {
+      // 1. Count pending (anything not resolved)
+      const pendingCount = ticketsArray.filter(t => {
+        const status = (t.status || "").toLowerCase();
+        return status !== "resolved" && status !== "resolved & verified";
+      }).length;
+
+      // 2. Count active urgent hazards
+      const urgentCount = ticketsArray.filter(t => {
+        const status = (t.status || "").toLowerCase();
+        const isPending = status !== "resolved" && status !== "resolved & verified";
+        return isPending && t.urgency === "Urgent";
+      }).length;
+
+      // 3. Count resolved within the last 7 days (This Week)
+      const oneWeekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+      const resolvedThisWeekCount = ticketsArray.filter(t => {
+        const status = (t.status || "").toLowerCase();
+        const isResolved = status === "resolved" || status === "resolved & verified";
+        
+        // Check timestamp if available, fallback to true if mock data
+        const ticketTime = t.createdAt || t.timestamp || Date.now();
+        return isResolved && ticketTime >= oneWeekAgo;
+      }).length;
+
+      // Update the DOM elements safely if they exist on the page
+      const pendingEl = document.getElementById("statPending");
+      const urgentEl = document.getElementById("statUrgent");
+      const resolvedEl = document.getElementById("statResolved");
+
+      if (pendingEl) pendingEl.textContent = pendingCount;
+      if (urgentEl) urgentEl.textContent = urgentCount;
+      if (resolvedEl) resolvedEl.textContent = resolvedThisWeekCount;
     }
 
     function renderFloorplanPins() {
       const container = document.getElementById("pinsContainer");
+      if (!container) return;
       container.innerHTML = "";
 
       tickets.forEach(ticket => {
@@ -1575,10 +1625,15 @@
     }
 
     function renderDirectory() {
-      const search = document.getElementById("searchInput").value.toLowerCase().trim();
-      const urgency = document.getElementById("urgencyFilter").value;
-      const category = document.getElementById("categoryFilter").value;
-      const locType = document.getElementById("locationTypeFilter").value;
+      const searchEl = document.getElementById("searchInput");
+      const urgencyEl = document.getElementById("urgencyFilter");
+      const categoryEl = document.getElementById("categoryFilter");
+      const locTypeEl = document.getElementById("locationTypeFilter");
+
+      const search = searchEl ? searchEl.value.toLowerCase().trim() : "";
+      const urgency = urgencyEl ? urgencyEl.value : "ALL";
+      const category = categoryEl ? categoryEl.value : "ALL";
+      const locType = locTypeEl ? locTypeEl.value : "ALL";
 
       const filtered = tickets.filter(t => {
         const matchesSearch =
@@ -1638,14 +1693,6 @@
           </article>
         `;
       }).join("");
-      cards.querySelectorAll(".ticket-card-media img").forEach(image => {
-        image.addEventListener("error", () => {
-          const placeholder = document.createElement("div");
-          placeholder.className = "ticket-media-placeholder";
-          placeholder.textContent = "📷 Evidence image unavailable";
-          image.replaceWith(placeholder);
-        }, { once: true });
-      });
     }
 
     function openInspectModal(ticketId) {
@@ -1687,9 +1734,9 @@
 
             <label class="field-label">UPDATE WORK ORDER STATUS</label>
             <select id="modalStatus" class="select-ctrl" style="margin-bottom:18px;">
-              <option value="PENDING" ${t.status === 'PENDING' ? 'selected' : ''}>PENDING TRIAGE</option>
-              <option value="DISPATCHED" ${t.status === 'DISPATCHED' ? 'selected' : ''}>DISPATCHED TO CONTRACTOR</option>
-              <option value="RESOLVED" ${t.status === 'RESOLVED' ? 'selected' : ''}>RESOLVED & VERIFIED</option>
+              <option value="Pending" ${t.status === 'PENDING' ? 'selected' : ''}>PENDING TRIAGE</option>
+              <option value="In Progress" ${t.status === 'DISPATCHED' ? 'selected' : ''}>DISPATCHED TO CONTRACTOR</option>
+              <option value="Resolved" ${t.status === 'RESOLVED' ? 'selected' : ''}>RESOLVED & VERIFIED</option>
             </select>
 
             <button class="btn-orange-submit" style="width:100%;" onclick="saveDispatchUpdate('${t.id}')">
@@ -1702,12 +1749,33 @@
       document.getElementById("inspectModal").classList.add("open");
     }
 
-    function saveDispatchUpdate(ticketId) {
+    async function saveDispatchUpdate(ticketId) {
       const idx = tickets.findIndex(t => t.id === ticketId);
       if (idx > -1) {
-        tickets[idx].contractor = document.getElementById("modalContractor").value;
-        tickets[idx].status = document.getElementById("modalStatus").value;
+        const selectedContractor = document.getElementById("modalContractor").value;
+        const selectedStatus = document.getElementById("modalStatus").value;
+
+        tickets[idx].contractor = selectedContractor;
+        tickets[idx].status = selectedStatus;
+        
         saveTickets();
+
+        try {
+          const report = tickets[idx];
+          if (report.firebaseDocId) {
+            await updateTicketStatusInDatabase(
+              report.firebaseDocId, 
+              selectedStatus, 
+              `Assigned to ${selectedContractor}`
+            );
+            console.log("Successfully updated Firebase status!");
+          } else {
+            console.warn("No firebaseDocId found for this ticket, saved locally only.");
+          }
+        } catch (error) {
+          console.error("Failed to update Firebase:", error);
+        }
+
         renderDirectory();
         closeInspectModal();
       }
@@ -1719,9 +1787,12 @@
 
     initializeStaffAccount();
     initializeStaffNavigation();
-    updateStats();
-    renderFloorplanPins();
-    renderDirectory();
+    initStaffRealtimeTickets();
+
+    window.openInspectModal = openInspectModal;
+    window.closeInspectModal = closeInspectModal;
+    window.saveDispatchUpdate = saveDispatchUpdate;
+    window.filterByPin = filterByPin;
   </script>
 </body>
 </html>

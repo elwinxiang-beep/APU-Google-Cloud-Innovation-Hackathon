@@ -1,6 +1,7 @@
 // Import Firebase modular SDKs via CDN
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, onSnapshot, addDoc, doc, query, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, collection, onSnapshot, doc, setDoc, query, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { updateStats } from "./app.js"
 
 // Firebase project configuration keys
 const firebaseConfig = {
@@ -17,30 +18,38 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 /**
- * 1. Sync User Session / Login to Firestore 'users' collection
+ * 1. Sync User Session / Login to Firestore 'users' collection without duplicates
  */
 export async function syncUserToDatabase(userObject) {
     try {
-        await addDoc(collection(db, "users"), {
+        // Use userObject.id (UID) as the document ID so it updates instead of duplicating
+        const userDocRef = doc(db, "users", userObject.id);
+        
+        await setDoc(userDocRef, {
             userId: userObject.id,
             name: userObject.name,
             role: userObject.role,
-            unit: userObject.unit,
-            phone: userObject.phone,
+            unit: userObject.unit || "",
+            phone: userObject.phone || "",
             lastLogin: serverTimestamp()
-        });
-        console.log("User session synced to Firestore.");
+        }, { merge: true }); // { merge: true } updates fields without wiping existing data
+        
+        console.log("User session synced securely without duplicates.");
     } catch (error) {
         console.error("Error syncing user session: ", error);
     }
 }
 
 /**
- * 2. Submit a New Maintenance Ticket to Firestore 'tickets' collection
+ * 2. Submit or Update a Maintenance Ticket in Firestore without duplicates
  */
 export async function submitTicketToDatabase(reportData) {
     try {
-        const docRef = await addDoc(collection(db, "tickets"), {
+        // Use reportData.id (e.g. "HK-2026-0304") as the exact Firestore document ID
+        const ticketDocRef = doc(db, "tickets", reportData.id);
+
+        await setDoc(ticketDocRef, {
+            id: reportData.id,
             ticketId: reportData.id,
             reporterName: reportData.reporterName,
             reporterPhone: reportData.reporterPhone,
@@ -52,14 +61,14 @@ export async function submitTicketToDatabase(reportData) {
             description: reportData.description,
             status: reportData.status || "Pending",
             floorplan: reportData.floorplan || {},
-            imageUrl: reportData.imageUrl || "", // Base64 or URL string
+            imageUrl: reportData.imageUrl || "",
             videoUrl: reportData.videoUrl || "",
             staffNotes: reportData.staffNotes || "",
             createdAt: serverTimestamp()
-        });
+        }, { merge: true }); // Prevents overwriting if it already exists
 
-        console.log("Ticket successfully written to Firestore with ID: ", docRef.id);
-        return docRef.id;
+        console.log("Ticket securely saved to Firestore without duplicates.");
+        return reportData.id;
     } catch (error) {
         console.error("Error adding ticket to Firestore: ", error);
         throw error;
@@ -105,6 +114,7 @@ export function listenToTickets(onUpdateCallback) {
                 id: data.id || docSnap.id 
             });
         });
+        updateStats(remoteReports)
         
         // Pass fresh data back to the frontend application
         onUpdateCallback(remoteReports);
