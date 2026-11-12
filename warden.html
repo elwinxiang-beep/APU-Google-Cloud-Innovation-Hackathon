@@ -1,0 +1,1727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HostelKaki | Staff Command & Report Directory</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    :root {
+      --primary-blue: #1579f5;
+      --deep-blue: #15438f;
+      --sky-blue: #56b8ff;
+      --accent-orange: #ff6b35;
+      --urgent-red: #ef4444;
+      --medium-amber: #f59e0b;
+      --normal-green: #10b981;
+      --bg-page: #f8fafc;
+      --text-dark: #0f172a;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; }
+
+    body {
+      background: var(--bg-page);
+      color: var(--text-dark);
+      min-height: 100vh;
+    }
+
+    .floating-menu-btn {
+      position: fixed;
+      left: 0;
+      top: 48%;
+      background: #1d6bf3;
+      color: #fff;
+      border: none;
+      border-radius: 0 10px 10px 0;
+      padding: 12px 14px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      box-shadow: 2px 4px 12px rgba(29, 107, 243, 0.35);
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .navbar {
+      background: #ffffff;
+      height: 68px;
+      padding: 0 36px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 40;
+    }
+
+    .nav-left { display: flex; align-items: center; gap: 16px; }
+
+    .hamburger {
+      font-size: 20px;
+      color: #475569;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .hk-badge {
+      background: #1d6bf3;
+      color: #fff;
+      font-weight: 800;
+      font-size: 14px;
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .brand-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.5px;
+    }
+
+    .brand-title span { color: #1d6bf3; }
+
+    .portal-tag {
+      font-size: 12px;
+      color: var(--text-muted);
+      border-left: 1px solid #cbd5e1;
+      padding-left: 10px;
+      font-weight: 500;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 28px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      color: #475569;
+      transition: 0.2s;
+      cursor: pointer;
+    }
+
+    .nav-links a.active, .nav-links a:hover {
+      color: #1d6bf3;
+      font-weight: 700;
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .btn-resident-switch {
+      background: #eff6ff;
+      color: #1d6bf3;
+      border: 1px solid #bfdbfe;
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-size: 12.5px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: 0.2s;
+    }
+
+    .btn-resident-switch:hover {
+      background: #1d6bf3;
+      color: #ffffff;
+    }
+
+    .user-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      padding: 4px 10px 4px 4px;
+      border-radius: 999px;
+    }
+
+    .avatar-circle {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #0f172a;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .role-select-dropdown {
+      border: none;
+      background: transparent;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #1e293b;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .role-badge-staff {
+      background: #dbeafe;
+      color: #1e40af;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 4px;
+      letter-spacing: 0.4px;
+    }
+
+    .hero-banner {
+      background: radial-gradient(circle at 50% 20%, #175bc7 0%, #09275e 100%);
+      color: #fff;
+      padding: 40px 24px 36px;
+      text-align: center;
+      position: relative;
+    }
+
+    .hero-banner::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(rgba(255,255,255,0.12) 1px, transparent 1px);
+      background-size: 20px 20px;
+      pointer-events: none;
+    }
+
+    .hero-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 5px 14px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+      margin-bottom: 14px;
+    }
+
+    .hero-pill .dot {
+      width: 8px;
+      height: 8px;
+      background: #10b981;
+      border-radius: 50%;
+    }
+
+    .hero-title {
+      font-size: 42px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      margin-bottom: 8px;
+    }
+
+    .hero-title span { color: #38bdf8; }
+
+    .hero-sub {
+      font-size: 15px;
+      color: #cbd5e1;
+      max-width: 580px;
+      margin: 0 auto 26px;
+    }
+
+    .stats-row {
+      display: flex;
+      justify-content: center;
+      gap: 56px;
+      border-top: 1px solid rgba(255,255,255,0.15);
+      max-width: 680px;
+      margin: 0 auto;
+      padding-top: 22px;
+      flex-wrap: wrap;
+    }
+
+    .stat-item h3 { font-size: 26px; font-weight: 800; margin-bottom: 2px; }
+    .stat-item p { font-size: 11.5px; color: #cbd5e1; }
+    .stat-orange { color: #fb923c; }
+    .stat-red { color: #f87171; }
+    .stat-green { color: #34d399; }
+    .stat-blue { color: #60a5fa; }
+
+    .container {
+      max-width: 1240px;
+      margin: 28px auto 60px;
+      padding: 0 24px;
+    }
+
+    .top-grid {
+      display: grid;
+      grid-template-columns: 1.55fr 1fr;
+      gap: 22px;
+      margin-bottom: 26px;
+    }
+
+    @media (max-width: 960px) {
+      .top-grid { grid-template-columns: 1fr; }
+      .nav-links { display: none; }
+      .ticket-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 16px;
+      border: 1px solid var(--border-color);
+      padding: 22px 24px;
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.03);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--text-dark);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .selected-pin-bar {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      font-size: 12.5px;
+    }
+
+    .pin-green-badge {
+      background: #dcfce7;
+      color: #15803d;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .floorplan-box {
+      position: relative;
+      width: 100%;
+      height: 290px;
+      background: #f8fafc;
+      border: 2px dashed #cbd5e1;
+      border-radius: 12px;
+      overflow: hidden;
+      background-image:
+        linear-gradient(to right, #e2e8f0 1px, transparent 1px),
+        linear-gradient(to bottom, #e2e8f0 1px, transparent 1px);
+      background-size: 28px 28px;
+    }
+
+    .room-block {
+      position: absolute;
+      border: 1.5px solid #94a3b8;
+      background: rgba(255, 255, 255, 0.85);
+      border-radius: 6px;
+      padding: 6px 8px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #334155;
+      pointer-events: none;
+    }
+
+    .map-pin {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 0 0 5px rgba(239, 68, 68, 0.25);
+      transition: transform 0.15s;
+      z-index: 5;
+    }
+
+    .map-pin:hover { transform: translate(-50%, -50%) scale(1.2); }
+    .pin-Urgent { background: var(--urgent-red); box-shadow: 0 0 0 6px rgba(239,68,68,0.28); }
+    .pin-Medium { background: var(--medium-amber); box-shadow: 0 0 0 6px rgba(245,158,11,0.28); }
+    .pin-Normal { background: var(--normal-green); box-shadow: 0 0 0 6px rgba(16,185,129,0.28); }
+
+    .ai-insight-box {
+      background: linear-gradient(135deg, #eff6ff 0%, #f8fafc 100%);
+      border: 1px solid #bfdbfe;
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+
+    .ai-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 800;
+      color: #1d4ed8;
+      background: #dbeafe;
+      padding: 3px 9px;
+      border-radius: 999px;
+      margin-bottom: 8px;
+    }
+
+    .filter-bar {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    @media (max-width: 800px) {
+      .filter-bar { grid-template-columns: 1fr 1fr; }
+      .ticket-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    .input-ctrl, .select-ctrl {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid var(--border-color);
+      border-radius: 10px;
+      font-size: 13px;
+      background: #fff;
+      color: var(--text-dark);
+      outline: none;
+    }
+
+    .input-ctrl:focus, .select-ctrl:focus {
+      border-color: #1579f5;
+      box-shadow: 0 0 0 3px rgba(21, 121, 245, 0.12);
+    }
+
+    .ticket-cards {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .ticket-card {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      overflow: hidden;
+      border: 1px solid #e2e8f0;
+      border-radius: 18px;
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+
+    .ticket-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.1);
+    }
+
+    .ticket-card-media {
+      position: relative;
+      height: 150px;
+      overflow: hidden;
+      background: #f1f5f9;
+    }
+
+    .ticket-card-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .ticket-media-placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      color: #64748b;
+      font-size: 13px;
+    }
+
+    .ticket-card-status,
+    .ticket-card-id,
+    .ticket-card-location {
+      position: absolute;
+      z-index: 1;
+      max-width: calc(100% - 20px);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .ticket-card-status {
+      top: 10px;
+      left: 10px;
+      padding: 5px 9px;
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.92);
+      color: #334155;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .ticket-card-status.status-PENDING { background: #fff7ed; color: #c2410c; }
+    .ticket-card-status.status-DISPATCHED { background: #eff6ff; color: #1d4ed8; }
+    .ticket-card-status.status-RESOLVED { background: #ecfdf5; color: #047857; }
+
+    .ticket-card-id {
+      top: 10px;
+      right: 10px;
+      max-width: 48%;
+      padding: 5px 8px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 8px;
+      background: rgba(15, 23, 42, 0.82);
+      color: #fff;
+      font-family: monospace;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .ticket-card-location {
+      right: 10px;
+      bottom: 10px;
+      left: 10px;
+      max-width: none;
+      padding: 6px 9px;
+      border-radius: 8px;
+      background: rgba(15, 23, 42, 0.72);
+      color: #fff;
+      font-size: 11px;
+    }
+
+    .ticket-card-body {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      gap: 12px;
+      padding: 16px;
+    }
+
+    .ticket-card-meta,
+    .ticket-card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .ticket-card-category {
+      min-width: 0;
+      overflow: hidden;
+      color: #1579f5;
+      font-size: 12px;
+      font-weight: 700;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .ticket-card-title {
+      margin-top: 5px;
+      color: #0f172a;
+      font-size: 14px;
+      font-weight: 800;
+      line-height: 1.4;
+    }
+
+    .ticket-card-description {
+      display: -webkit-box;
+      overflow: hidden;
+      margin-top: 5px;
+      color: #475569;
+      font-size: 12px;
+      line-height: 1.55;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 3;
+    }
+
+    .ticket-card-details {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 12px;
+      padding-top: 10px;
+      border-top: 1px solid #f1f5f9;
+    }
+
+    .ticket-card-details span,
+    .ticket-card-details strong {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .ticket-card-details span { color: #94a3b8; font-size: 10px; }
+    .ticket-card-details strong { margin-top: 3px; color: #334155; font-size: 11px; }
+
+    .ticket-card-footer {
+      margin-top: auto;
+      padding-top: 10px;
+      border-top: 1px solid #f1f5f9;
+      color: #64748b;
+      font-size: 11px;
+    }
+
+    .ticket-card-footer .btn-action { flex: 0 0 auto; }
+
+    .directory-empty {
+      padding: 40px 16px;
+      color: #64748b;
+      text-align: center;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 700;
+    }
+
+    .badge-Urgent { background: #fee2e2; color: #b91c1c; }
+    .badge-Medium { background: #fef3c7; color: #b45309; }
+    .badge-Normal { background: #dcfce7; color: #15803d; }
+
+    .status-pill {
+      padding: 4px 9px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      background: #e2e8f0;
+      color: #334155;
+    }
+
+    .status-RESOLVED { background: #dcfce7; color: #15803d; }
+    .status-DISPATCHED { background: #dbeafe; color: #1e40af; }
+    .status-PENDING { background: #ffedd5; color: #c2410c; }
+
+    .btn-action {
+      background: #eff6ff;
+      color: #1d6bf3;
+      border: 1px solid #bfdbfe;
+      padding: 7px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+
+    .btn-action:hover { background: #1d6bf3; color: #fff; }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 100;
+    }
+
+    .modal-backdrop.open { display: flex; }
+
+    .modal-content {
+      background: #ffffff;
+      width: 100%;
+      max-width: 860px;
+      max-height: 92vh;
+      overflow-y: auto;
+      border-radius: 18px;
+      padding: 28px 32px;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.35);
+    }
+
+    .form-row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-bottom: 16px;
+    }
+
+    .field-label {
+      display: block;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: #1e293b;
+      margin-bottom: 6px;
+      letter-spacing: 0.4px;
+    }
+
+    .btn-cancel {
+      background: #fff;
+      border: 1px solid #cbd5e1;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-orange-submit {
+      background: linear-gradient(135deg, #ff7a3d, #f0521a);
+      color: #fff;
+      border: none;
+      padding: 12px 22px;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(240, 82, 26, 0.3);
+    }
+
+    .navbar {
+      height: 64px;
+      padding: 0;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+    }
+
+    .navbar-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      width: 100%;
+      max-width: 1280px;
+      height: 100%;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .header-menu-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border: 0;
+      border-radius: 12px;
+      background: transparent;
+      color: #475569;
+      cursor: pointer;
+    }
+
+    .header-menu-btn:hover { background: #f1f5f9; color: #1579f5; }
+    .header-menu-btn svg { width: 24px; height: 24px; }
+
+    .staff-quick-nav {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .staff-quick-nav a {
+      padding: 8px 11px;
+      border-radius: 10px;
+      color: #475569;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .staff-quick-nav a:hover,
+    .staff-quick-nav a.active {
+      background: #eef8ff;
+      color: #0e60e1;
+    }
+
+    .staff-header-account {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      max-width: 290px;
+      padding: 4px 10px 4px 4px;
+      border: 1px solid #e2e8f0;
+      border-radius: 999px;
+      background: #fff;
+    }
+
+    .staff-header-account-name {
+      overflow: hidden;
+      color: #334155;
+      font-size: 12px;
+      font-weight: 700;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .staff-drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 49;
+      background: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(4px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .staff-drawer-backdrop.is-open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .staff-sidebar {
+      position: fixed;
+      inset: 0 auto 0 0;
+      z-index: 50;
+      display: flex;
+      flex-direction: column;
+      width: 320px;
+      max-width: 85vw;
+      background: #fff;
+      border-right: 1px solid #e2e8f0;
+      box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.3);
+      transform: translateX(-105%);
+      transition: transform 0.3s ease-in-out;
+    }
+
+    .staff-sidebar.is-open { transform: translateX(0); }
+
+    .staff-sidebar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px;
+      color: #fff;
+      background: linear-gradient(110deg, #15438f, #124db6);
+    }
+
+    .staff-sidebar-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .staff-sidebar-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #8ed2ff;
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .staff-sidebar-header h2 { font-size: 17px; font-weight: 800; }
+    .staff-sidebar-header p { margin-top: 2px; color: #bce4ff; font-size: 11px; }
+
+    .staff-sidebar-close {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 38px;
+      border: 0;
+      border-radius: 10px;
+      background: transparent;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .staff-sidebar-close:hover { background: rgba(255, 255, 255, 0.12); }
+    .staff-sidebar-close svg { width: 22px; height: 22px; }
+
+    .staff-sidebar-profile {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      border-bottom: 1px solid #e2e8f0;
+      background: #f8fafc;
+    }
+
+    .staff-sidebar-profile .avatar-circle {
+      width: 44px;
+      height: 44px;
+      flex: 0 0 auto;
+      border: 2px solid #bce4ff;
+      background: #d9f0ff;
+      color: #124db6;
+      font-size: 13px;
+    }
+
+    .staff-sidebar-profile-copy { min-width: 0; }
+    .staff-sidebar-profile-name {
+      overflow: hidden;
+      color: #1e293b;
+      font-size: 13px;
+      font-weight: 700;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .staff-sidebar-profile-role {
+      margin-top: 3px;
+      color: #64748b;
+      font-size: 11px;
+    }
+
+    .staff-sidebar-nav {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+    }
+
+    .staff-sidebar-nav a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 4px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      color: #475569;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.18s, color 0.18s;
+    }
+
+    .staff-sidebar-nav a:hover,
+    .staff-sidebar-nav a.active {
+      background: #eef8ff;
+      color: #0e60e1;
+    }
+
+    .staff-sidebar-nav svg {
+      width: 20px;
+      height: 20px;
+      flex: 0 0 auto;
+      color: #94a3b8;
+    }
+
+    .staff-sidebar-nav a:hover svg,
+    .staff-sidebar-nav a.active svg { color: #1579f5; }
+
+    .staff-sidebar-footer {
+      padding: 16px;
+      border-top: 1px solid #e2e8f0;
+      background: #f8fafc;
+    }
+
+    .staff-sidebar-footer a {
+      display: block;
+      padding: 11px 14px;
+      border-radius: 12px;
+      background: #1e293b;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      text-align: center;
+      text-decoration: none;
+    }
+
+    .staff-sidebar-footer a:hover { background: #0f172a; }
+
+    body.drawer-open { overflow: hidden; }
+
+    .floating-menu-btn {
+      background: #1579f5;
+      border-radius: 0 16px 16px 0;
+      box-shadow: 0 10px 25px -5px rgba(21, 121, 245, 0.4), 0 8px 10px -6px rgba(21, 121, 245, 0.2);
+      z-index: 40;
+    }
+
+    .hk-badge {
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      background: linear-gradient(45deg, #1579f5, #56b8ff);
+      box-shadow: 0 4px 10px rgba(21, 121, 245, 0.2);
+    }
+
+    .brand-title {
+      font-size: 18px;
+      letter-spacing: -0.5px;
+    }
+
+    .brand, .portal-tag, .nav-links a {
+      white-space: nowrap;
+    }
+
+    .hero-banner {
+      background: linear-gradient(180deg, #15438f 0%, #124db6 55%, #0f172a 100%);
+      padding: 64px 24px 48px;
+    }
+
+    .hero-title {
+      font-size: clamp(42px, 6vw, 64px);
+      letter-spacing: -1.5px;
+    }
+
+    .hero-sub {
+      font-size: 17px;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin-top: 32px;
+    }
+
+    #floorplanSection, #directory { scroll-margin-top: 84px; }
+
+    .card {
+      border-radius: 20px;
+      border-color: #e2e8f0;
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+    }
+
+    .ai-insight-box {
+      border-color: #bce4ff;
+      background: linear-gradient(135deg, #eef8ff 0%, #f8fafc 100%);
+      border-radius: 16px;
+    }
+
+    .ai-tag {
+      color: #124db6;
+      background: #d9f0ff;
+    }
+
+    .input-ctrl:focus, .select-ctrl:focus {
+      border-color: #1579f5;
+      box-shadow: 0 0 0 3px rgba(21, 121, 245, 0.12);
+    }
+
+    .btn-resident-switch, .btn-action {
+      color: #0e60e1;
+      background: #eef8ff;
+      border-color: #bce4ff;
+    }
+
+    .btn-resident-switch:hover, .btn-action:hover {
+      color: #fff;
+      background: #1579f5;
+    }
+
+    .btn-orange-submit {
+      background: linear-gradient(135deg, #ff6b35, #e85924);
+      border-radius: 12px;
+      box-shadow: 0 4px 14px rgba(255, 107, 53, 0.25);
+    }
+
+    .modal-content {
+      border-radius: 24px;
+      border: 1px solid #e2e8f0;
+    }
+
+    @media (max-width: 600px) {
+      .navbar-content { padding: 0 16px; gap: 8px; }
+      .staff-quick-nav { display: none; }
+      .nav-right { gap: 8px; }
+      .btn-resident-switch { padding: 7px 10px; }
+      .hero-banner { padding: 48px 18px 36px; }
+      .container { padding: 0 16px; }
+      .card { padding: 18px; }
+      .staff-header-account { gap: 6px; max-width: 190px; }
+      .staff-header-account-name { max-width: 100px; }
+      .ticket-cards { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 1280px) {
+      .nav-links { display: none; }
+      .staff-quick-nav { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <button class="floating-menu-btn" id="staff-sidebar-edge-btn" aria-label="Open Navigation Menu" title="Open Menu">
+    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
+    </svg>
+    <span>MENU</span>
+  </button>
+
+  <div class="staff-drawer-backdrop" id="staff-drawer-backdrop"></div>
+  <aside class="staff-sidebar" id="staff-sidebar" aria-label="Staff navigation" aria-hidden="true">
+    <div class="staff-sidebar-header">
+      <div class="staff-sidebar-brand">
+        <div class="staff-sidebar-logo">HK</div>
+        <div>
+          <h2>HostelKaki</h2>
+          <p>Staff Command Center</p>
+        </div>
+      </div>
+      <button class="staff-sidebar-close" id="staff-sidebar-close-btn" aria-label="Close Navigation Menu">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path>
+        </svg>
+      </button>
+    </div>
+
+    <div class="staff-sidebar-profile">
+      <div class="avatar-circle" id="staffDrawerInitials">WL</div>
+      <div class="staff-sidebar-profile-copy">
+        <div class="staff-sidebar-profile-name" id="staffDrawerName">Facility Staff</div>
+        <div class="staff-sidebar-profile-role">Facility Staff</div>
+      </div>
+    </div>
+
+    <nav class="staff-sidebar-nav" aria-label="Staff portal navigation">
+      <a href="#directory" class="active">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5h6m-6 4h6m-6 4h6m-6 4h6M5 5h.01M5 9h.01M5 13h.01M5 17h.01"></path>
+        </svg>
+        <span>Staff Report Directory</span>
+      </a>
+      <a href="#floorplanSection">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3V6zm6-3v15m6-12v15"></path>
+        </svg>
+        <span>Floorplan Hazard Map</span>
+      </a>
+      <a href="index.html">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3"></path>
+        </svg>
+        <span>Resident Portal</span>
+      </a>
+    </nav>
+
+    <div class="staff-sidebar-footer">
+      <a href="index.html#report">← Resident Report Page</a>
+    </div>
+  </aside>
+
+  <header class="navbar">
+    <div class="navbar-content">
+      <div class="nav-left">
+        <button class="header-menu-btn" id="staff-header-menu-btn" aria-label="Open Navigation Menu" title="Open Menu">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
+        </button>
+        <a href="index.html#home" class="brand">
+          <div class="hk-badge">HK</div>
+          <div class="brand-title">Hostel<span>Kaki</span></div>
+          <span class="portal-tag">Staff Command Center</span>
+        </a>
+      </div>
+
+      <nav class="staff-quick-nav" aria-label="Quick navigation">
+        <a href="#directory" class="active">Directory</a>
+        <a href="#floorplanSection">Floorplan</a>
+        <a href="index.html">Resident Portal</a>
+      </nav>
+
+      <div class="nav-right">
+        <a href="index.html#report" class="btn-resident-switch">Resident Portal</a>
+        <div class="staff-header-account" title="Signed-in staff account">
+          <div class="avatar-circle" id="staffHeaderInitials">WL</div>
+          <span class="staff-header-account-name" id="staffHeaderName">Facility Staff</span>
+          <span class="role-badge-staff" id="navUserRole">STAFF</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Banner -->
+  <header class="hero-banner">
+    <div class="hero-pill">
+      <span class="dot"></span> GEMINI ENTERPRISE MULTIMODAL TRIAGE ACTIVE
+    </div>
+    <h1 class="hero-title">Hostel<span>Kaki</span></h1>
+    <p class="hero-sub">"Warden & Maintenance Command Center — Real-time floorplan pins, AI severity triage, and work order dispatch"</p>
+
+    <div class="stats-row">
+      <div class="stat-item">
+        <h3 class="stat-orange" id="statPending">4</h3>
+        <p>Pending Fixes</p>
+      </div>
+      <div class="stat-item">
+        <h3 class="stat-red" id="statUrgent">2</h3>
+        <p>Urgent Hazards</p>
+      </div>
+      <div class="stat-item">
+        <h3 class="stat-green" id="statResolved">18</h3>
+        <p>Resolved This Week</p>
+      </div>
+      <div class="stat-item">
+        <h3 class="stat-blue">&lt; 4 hrs</h3>
+        <p>Average Response</p>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- Floorplan Overview + Gemini AI Triage Queue -->
+    <div class="top-grid">
+      <div class="card" id="floorplanSection">
+        <div class="card-header">
+          <div class="card-title">🗺️ Mapped Floorplan Incidents (Click Any Pin to Triage)</div>
+          <span style="font-size:12px; color:var(--text-muted);">Block B — Level 3 Residential Wing</span>
+        </div>
+
+        <div class="selected-pin-bar">
+          <div>
+            <strong>Selected Pin:</strong>
+            <span class="pin-green-badge" id="activePinBadge">
+              📍 Level 3 — Room 304 (Single Unit) (Coords: X:213, Y:314)
+            </span>
+          </div>
+          <a style="color:#ef4444; font-weight:700; font-size:12px; cursor:pointer; text-decoration:underline;" onclick="filterByPin('ALL')">Show All Pins</a>
+        </div>
+
+        <div class="floorplan-box" id="staffFloorplan">
+          <div class="room-block" style="left:18px; top:18px; width:130px; height:95px;">Room 301<br><small>Twin Sharing</small></div>
+          <div class="room-block" style="left:160px; top:18px; width:135px; height:95px;">Room 304<br><small>Single Unit</small></div>
+          <div class="room-block" style="left:308px; top:18px; width:135px; height:95px;">Room 308<br><small>Single Unit</small></div>
+          <div class="room-block" style="left:456px; top:18px; width:160px; height:95px;">Common Pantry<br><small>Water Dispenser</small></div>
+          <div class="room-block" style="left:18px; top:165px; width:275px; height:105px;">Corridor & Lift Lobby B<br><small>Common Area (Others)</small></div>
+          <div class="room-block" style="left:308px; top:165px; width:308px; height:105px;">Shared Washroom & Showers<br><small>Block B Level 3</small></div>
+          <div id="pinsContainer"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">✨ Gemini Enterprise AI Triage Queue</div>
+        </div>
+
+        <div class="ai-insight-box">
+          <div class="ai-tag">🚨 CRITICAL MULTIMODAL DETECTION</div>
+          <h4 style="font-size:14px; margin-bottom:4px;">Room 304 — Active Pipe & AC Condensate Leak</h4>
+          <p style="font-size:12.5px; color:#475569; margin-bottom:8px;">
+            Gemini Vision detected water pooling within 15cm of a 240V wall socket. Auto-classified as <strong>HVAC / Plumbing</strong> (Urgency 5/5).
+          </p>
+          <div style="font-size:11.5px; font-weight:700; color:#0f172a;">
+            🔧 Suggested Tools: Drain pump, PTFE tape, Wet vacuum
+          </div>
+        </div>
+
+        <div class="ai-insight-box" style="background:#fffbeb; border-color:#fde68a;">
+          <div class="ai-tag" style="background:#fef3c7; color:#b45309;">⚡ PATTERN ALERT — BLOCK B</div>
+          <h4 style="font-size:14px; margin-bottom:4px;">2 Plumbing Reports on Level 3 Today</h4>
+          <p style="font-size:12.5px; color:#475569;">
+             Gemini recommends dispatching <strong>Ah Meng Plumbing Services</strong> to inspect the main Level 3 pressure valve in a single trip.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Staff Report Directory Table -->
+    <div class="card" id="directory">
+      <div class="card-header">
+        <div class="card-title">📋 Staff Report Directory (Incoming Student Tickets)</div>
+        <span style="font-size:12px; color:var(--text-muted);" id="ticketCountLabel">Showing 4 reports</span>
+      </div>
+
+      <div class="filter-bar">
+        <input type="text" id="searchInput" class="input-ctrl" placeholder="🔍 Search unit (e.g. Room 304), description, or phone..." oninput="renderDirectory()" />
+        <select id="urgencyFilter" class="select-ctrl" onchange="renderDirectory()">
+          <option value="ALL">All Urgency Levels</option>
+          <option value="Urgent">🔴 Urgent (Hazard / Active Leak / Power Outage)</option>
+          <option value="Medium">🟡 Medium (Fix within 24 hours)</option>
+          <option value="Normal">🟢 Normal (Fix within 48 hours)</option>
+        </select>
+        <select id="categoryFilter" class="select-ctrl" onchange="renderDirectory()">
+          <option value="ALL">All Issue Categories</option>
+          <option value="Plumbing & Water">💧 Plumbing & Water</option>
+          <option value="Plumbing & Water Leak">💧 Plumbing & Water Leak</option>
+          <option value="Air Conditioning">❄️ Air Conditioning</option>
+          <option value="Air Conditioning (HVAC)">❄️ Air Conditioning (HVAC)</option>
+          <option value="Electrical & Lighting">⚡ Electrical & Lighting</option>
+          <option value="Furniture & Fixtures">🪑 Furniture & Fixtures</option>
+          <option value="Doors, Windows & Lock">🔑 Doors, Windows & Lock</option>
+          <option value="Cleanliness & Pest">🐜 Cleanliness & Pest</option>
+          <option value="Other Issue">⚙️ Other Issue</option>
+          <option value="Carpentry & Door Lock">🚪 Carpentry & Door Lock</option>
+        </select>
+        <select id="locationTypeFilter" class="select-ctrl" onchange="renderDirectory()">
+          <option value="ALL">All Locations (Unit & Others)</option>
+          <option value="Unit">🏠 Residential Unit Number</option>
+          <option value="Others">🏢 Others (Corridor / Common Area)</option>
+        </select>
+      </div>
+
+      <div class="ticket-cards" id="directoryCards"></div>
+      <div class="directory-empty" id="directoryEmpty" hidden>
+        <strong>No reports found</strong>
+        <p>Try changing your search or filters.</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Staff Ticket Inspector & AI Dispatch Modal -->
+  <div class="modal-backdrop" id="inspectModal">
+    <div class="modal-content">
+      <div class="card-header">
+        <div class="card-title" id="modalTicketTitle">Inspect Maintenance Report</div>
+        <button class="btn-cancel" onclick="closeInspectModal()">✕ Close</button>
+      </div>
+
+      <div class="form-row-2" id="inspectModalBody"></div>
+    </div>
+  </div>
+
+  <script>
+    const APP_REPORTS_KEY = "hostelkaki_reports_v2";
+    const APP_USER_KEY = "hostelkaki_active_user_v2";
+
+    function getStoredArray(key) {
+      const storedValue = localStorage.getItem(key);
+      if (storedValue === null) return null;
+
+      const parsedValue = JSON.parse(storedValue);
+      if (!Array.isArray(parsedValue)) {
+        throw new TypeError(`${key} must contain a JSON array.`);
+      }
+      return parsedValue;
+    }
+
+    function initializeStaffAccount() {
+      const storedUser = localStorage.getItem(APP_USER_KEY);
+      if (!storedUser) return;
+
+      try {
+        const user = JSON.parse(storedUser);
+        if (user.role !== "staff") return;
+        const name = user.name || "Facility Staff";
+        const initials = user.avatar || name.split(" ").map(part => part[0]).join("").slice(0, 2).toUpperCase();
+        document.getElementById("staffHeaderName").textContent = name;
+        document.getElementById("staffHeaderInitials").textContent = initials;
+        document.getElementById("staffDrawerName").textContent = name;
+        document.getElementById("staffDrawerInitials").textContent = initials;
+      } catch (error) {
+        console.error("Could not read the signed-in staff account.", error);
+      }
+    }
+
+    function setStaffDrawerOpen(isOpen) {
+      const drawer = document.getElementById("staff-sidebar");
+      const backdrop = document.getElementById("staff-drawer-backdrop");
+      const openButtons = [
+        document.getElementById("staff-sidebar-edge-btn"),
+        document.getElementById("staff-header-menu-btn")
+      ];
+
+      drawer.classList.toggle("is-open", isOpen);
+      backdrop.classList.toggle("is-open", isOpen);
+      drawer.setAttribute("aria-hidden", String(!isOpen));
+      document.body.classList.toggle("drawer-open", isOpen);
+      openButtons.forEach(button => button.setAttribute("aria-expanded", String(isOpen)));
+    }
+
+    function initializeStaffNavigation() {
+      const drawer = document.getElementById("staff-sidebar");
+      const openButtons = [
+        document.getElementById("staff-sidebar-edge-btn"),
+        document.getElementById("staff-header-menu-btn")
+      ];
+
+      openButtons.forEach(button => {
+        button.addEventListener("click", () => setStaffDrawerOpen(true));
+        button.setAttribute("aria-controls", "staff-sidebar");
+        button.setAttribute("aria-expanded", "false");
+      });
+
+      document.getElementById("staff-sidebar-close-btn")
+        .addEventListener("click", () => setStaffDrawerOpen(false));
+      document.getElementById("staff-drawer-backdrop")
+        .addEventListener("click", () => setStaffDrawerOpen(false));
+      drawer.querySelectorAll('a[href^="#"]').forEach(link => {
+        link.addEventListener("click", () => setStaffDrawerOpen(false));
+      });
+      window.addEventListener("keydown", event => {
+        if (event.key === "Escape") setStaffDrawerOpen(false);
+      });
+    }
+
+    const defaultTickets = [
+      {
+        id: "HK-2026-0304",
+        studentName: "Alex Tan",
+        phone: "+6012-3456789",
+        dateTime: "2026-11-11 20:43",
+        locationType: "Unit",
+        locationName: "Level 3 — Room 304 (Single Unit)",
+        coords: { x: 213, y: 65 },
+        displayCoords: "X:213, Y:314",
+        category: "Plumbing & Water Leak",
+        urgency: "Urgent",
+        description: "Pipe dripping beneath bathroom sink onto study floor near power extension.",
+        imageUrl: "https://images.unsplash.com/photo-1585704032915-c3400ca199e7?auto=format&fit=crop&w=500&q=80",
+        videoAttached: true,
+        status: "PENDING",
+        contractor: "Unassigned",
+        aiTriage: {
+          trade: "Plumbing / Electrical Hazard",
+          score: "5/5 Emergency",
+          hazard: "Active water leak adjacent to 240V outlet",
+          tools: "Pipe wrench, PTFE thread tape, P-trap seal"
+        }
+      },
+      {
+        id: "HK-2026-0308",
+        studentName: "Sarah Lim",
+        phone: "+6017-8892341",
+        dateTime: "2026-11-11 19:15",
+        locationType: "Unit",
+        locationName: "Level 3 — Room 308 (Single Unit)",
+        coords: { x: 365, y: 65 },
+        displayCoords: "X:365, Y:190",
+        category: "Air Conditioning (HVAC)",
+        urgency: "Urgent",
+        description: "Aircond indoor blower leaking water onto study desk and making loud buzzing noise.",
+        imageUrl: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=500&q=80",
+        videoAttached: true,
+        status: "DISPATCHED",
+        contractor: "Ah Meng Aircond Services",
+        aiTriage: {
+          trade: "HVAC",
+          score: "5/5 Emergency",
+          hazard: "Condensate overflow above study desk electronics",
+          tools: "Condensate drain pump, coil fin brush"
+        }
+      },
+      {
+        id: "HK-2026-0399",
+        studentName: "Amirul Hakim",
+        phone: "+6019-2234512",
+        dateTime: "2026-11-11 16:30",
+        locationType: "Others",
+        locationName: "Others — Block B Level 3 Lift Lobby Corridor",
+        coords: { x: 145, y: 215 },
+        displayCoords: "X:145, Y:215",
+        category: "Electrical & Lighting",
+        urgency: "Medium",
+        description: "Fluorescent hallway tube flickering nonstop outside lift lobby entrance.",
+        imageUrl: "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=500&q=80",
+        videoAttached: false,
+        status: "PENDING",
+        contractor: "Unassigned",
+        aiTriage: {
+          trade: "Electrical",
+          score: "3/5 Priority",
+          hazard: "Reduced night visibility in common corridor",
+          tools: "LED T8 replacement tube, starter ballast"
+        }
+      },
+      {
+        id: "HK-2026-0301",
+        studentName: "Daniel Wong",
+        phone: "+6011-5543901",
+        dateTime: "2026-11-10 14:10",
+        locationType: "Unit",
+        locationName: "Level 3 — Room 301 (Twin Sharing)",
+        coords: { x: 75, y: 65 },
+        displayCoords: "X:75, Y:110",
+        category: "Carpentry & Door Lock",
+        urgency: "Normal",
+        description: "Study wardrobe hinge loose, door does not close flush.",
+        imageUrl: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=500&q=80",
+        videoAttached: false,
+        status: "RESOLVED",
+        contractor: "Campus Carpentry Team",
+        aiTriage: {
+          trade: "Carpentry",
+          score: "1/5 Routine",
+          hazard: "No immediate safety hazard",
+          tools: "35mm concealed cabinet hinge, Phillips screwdriver"
+        }
+      }
+    ];
+
+    function reportToTicket(report) {
+      const locationType = report.locationType || "";
+      const floorplan = report.floorplan || {};
+      const status = (report.status || "Pending").toLowerCase();
+      const locationName = report.customLocation
+        ? `${locationType} — ${report.customLocation}`
+        : locationType;
+
+      return {
+        id: report.id,
+        studentName: report.reporterName || "Resident",
+        phone: report.reporterPhone || "",
+        dateTime: (report.datetime || "").replace("T", " "),
+        locationType: locationType === "Others" || locationType.indexOf("Common Area") === 0 ? "Others" : "Unit",
+        locationName: locationName || "Location not specified",
+        coords: { x: Math.round((floorplan.x || 0) * 0.75), y: Math.round((floorplan.y || 0) * 0.6) },
+        displayCoords: floorplan.x !== undefined && floorplan.y !== undefined
+          ? `X:${floorplan.x}, Y:${floorplan.y}`
+          : "Not pinned",
+        category: report.category || "Other Issue",
+        urgency: report.urgency || "Normal",
+        description: report.description || "",
+        imageUrl: report.imageUrl || "",
+        videoAttached: Boolean(report.videoUrl),
+        status: status === "resolved" ? "RESOLVED" : status === "in progress" ? "DISPATCHED" : "PENDING",
+        contractor: report.contractor || "Unassigned",
+        aiTriage: {
+          trade: report.category || "Maintenance",
+          score: report.urgency === "Urgent" ? "5/5 Emergency" : report.urgency === "Medium" ? "3/5 Priority" : "1/5 Routine",
+          hazard: report.description || "No additional hazard details provided",
+          tools: "Assessment required"
+        }
+      };
+    }
+
+    const storedReports = getStoredArray(APP_REPORTS_KEY);
+    const usingSharedReports = storedReports !== null;
+    const legacyTickets = getStoredArray("hostelkaki_tickets");
+    let tickets = usingSharedReports
+      ? storedReports.map(reportToTicket)
+      : legacyTickets || defaultTickets;
+    let selectedFilterId = "ALL";
+
+    function saveTickets() {
+      if (usingSharedReports) {
+        const reports = getStoredArray(APP_REPORTS_KEY);
+        if (reports === null) {
+          throw new Error("The resident report list could not be loaded.");
+        }
+
+        tickets.forEach(ticket => {
+          const report = reports.find(item => item.id === ticket.id);
+          if (!report) return;
+          report.status = ticket.status === "RESOLVED"
+            ? "Resolved"
+            : ticket.status === "DISPATCHED" ? "In Progress" : "Pending";
+          report.contractor = ticket.contractor;
+        });
+        localStorage.setItem(APP_REPORTS_KEY, JSON.stringify(reports));
+      } else {
+        localStorage.setItem("hostelkaki_tickets", JSON.stringify(tickets));
+      }
+      updateStats();
+    }
+
+    function updateStats() {
+      const pending = tickets.filter(t => t.status !== "RESOLVED").length;
+      const urgent = tickets.filter(t => t.urgency === "Urgent" && t.status !== "RESOLVED").length;
+      const resolved = tickets.filter(t => t.status === "RESOLVED").length;
+      document.getElementById("statPending").textContent = pending;
+      document.getElementById("statUrgent").textContent = urgent;
+      document.getElementById("statResolved").textContent = resolved;
+    }
+
+    function renderFloorplanPins() {
+      const container = document.getElementById("pinsContainer");
+      container.innerHTML = "";
+
+      tickets.forEach(ticket => {
+        const pin = document.createElement("div");
+        pin.className = `map-pin pin-${ticket.urgency}`;
+        pin.style.left = `${ticket.coords.x}px`;
+        pin.style.top = `${ticket.coords.y}px`;
+        pin.title = `${ticket.locationName} (${ticket.category})`;
+        pin.textContent = ticket.urgency === "Urgent" ? "!" : "📍";
+        pin.onclick = () => {
+          document.getElementById("activePinBadge").textContent =
+            `📍 ${ticket.locationName} (Coords: ${ticket.displayCoords})`;
+          openInspectModal(ticket.id);
+        };
+        container.appendChild(pin);
+      });
+    }
+
+    function filterByPin(id) {
+      selectedFilterId = id;
+      renderDirectory();
+    }
+
+    function renderDirectory() {
+      const search = document.getElementById("searchInput").value.toLowerCase().trim();
+      const urgency = document.getElementById("urgencyFilter").value;
+      const category = document.getElementById("categoryFilter").value;
+      const locType = document.getElementById("locationTypeFilter").value;
+
+      const filtered = tickets.filter(t => {
+        const matchesSearch =
+          t.id.toLowerCase().includes(search) ||
+          t.locationName.toLowerCase().includes(search) ||
+          t.description.toLowerCase().includes(search) ||
+          t.phone.toLowerCase().includes(search) ||
+          t.studentName.toLowerCase().includes(search) ||
+          t.category.toLowerCase().includes(search);
+        const matchesUrgency = urgency === "ALL" || t.urgency === urgency;
+        const matchesCat = category === "ALL" || t.category === category;
+        const matchesLoc = locType === "ALL" || t.locationType === locType;
+        const matchesPin = selectedFilterId === "ALL" || t.id === selectedFilterId;
+        return matchesSearch && matchesUrgency && matchesCat && matchesLoc && matchesPin;
+      });
+
+      document.getElementById("ticketCountLabel").textContent = `Showing ${filtered.length} report(s)`;
+      const cards = document.getElementById("directoryCards");
+      const emptyState = document.getElementById("directoryEmpty");
+      emptyState.hidden = filtered.length > 0;
+      cards.innerHTML = filtered.map(t => {
+        const statusLabel = t.status === "DISPATCHED"
+          ? "In Progress"
+          : t.status === "RESOLVED" ? "Resolved" : "Pending";
+        const dateParts = t.dateTime.split(" ");
+
+        return `
+          <article class="ticket-card">
+            <div class="ticket-card-media">
+              ${t.imageUrl
+                ? `<img src="${t.imageUrl}" alt="Issue evidence for ${t.id}" />`
+                : `<div class="ticket-media-placeholder">📷 No photo attached</div>`}
+              <span class="ticket-card-status status-${t.status}">${statusLabel}</span>
+              <span class="ticket-card-id">${t.id}</span>
+              <span class="ticket-card-location">📍 ${t.locationName}</span>
+            </div>
+            <div class="ticket-card-body">
+              <div>
+                <div class="ticket-card-meta">
+                  <span class="ticket-card-category">${t.category}</span>
+                  <span class="badge badge-${t.urgency}">${t.urgency}</span>
+                </div>
+                <h3 class="ticket-card-title">${t.locationName}</h3>
+                <p class="ticket-card-description">${t.description}</p>
+              </div>
+              <div class="ticket-card-details">
+                <div><span>Reporter</span><strong>${t.studentName}</strong></div>
+                <div><span>Reported</span><strong>${dateParts[0] || "Date unavailable"} ${dateParts[1] || ""}</strong></div>
+                <div><span>Contact</span><strong>${t.phone || "Not provided"}</strong></div>
+                <div><span>Assigned team</span><strong>${t.contractor}</strong></div>
+              </div>
+              <div class="ticket-card-footer">
+                <span>📍 ${t.displayCoords}${t.videoAttached ? " · 🎥 Video" : ""}</span>
+                <button class="btn-action" onclick="openInspectModal('${t.id}')">Manage Ticket</button>
+              </div>
+            </div>
+          </article>
+        `;
+      }).join("");
+      cards.querySelectorAll(".ticket-card-media img").forEach(image => {
+        image.addEventListener("error", () => {
+          const placeholder = document.createElement("div");
+          placeholder.className = "ticket-media-placeholder";
+          placeholder.textContent = "📷 Evidence image unavailable";
+          image.replaceWith(placeholder);
+        }, { once: true });
+      });
+    }
+
+    function openInspectModal(ticketId) {
+      const t = tickets.find(item => item.id === ticketId);
+      if (!t) return;
+
+      document.getElementById("modalTicketTitle").textContent =
+        `Ticket ${t.id} — ${t.locationName}`;
+
+      document.getElementById("inspectModalBody").innerHTML = `
+        <div>
+          <img src="${t.imageUrl}" style="width:100%; height:210px; object-fit:cover; border-radius:12px; border:1px solid #cbd5e1; margin-bottom:12px;" />
+          <div style="background:#f8fafc; padding:12px; border-radius:10px; border:1px solid #e2e8f0; font-size:12.5px;">
+            <p style="margin-bottom:6px;"><strong>📅 Date & Time:</strong> ${t.dateTime}</p>
+            <p style="margin-bottom:6px;"><strong>📍 Location (${t.locationType}):</strong> ${t.locationName}</p>
+            <p style="margin-bottom:6px;"><strong>🗺️ Floorplan Pin:</strong> ${t.displayCoords}</p>
+            <p style="margin-bottom:6px;"><strong>📞 Phone Number:</strong> ${t.phone} (${t.studentName})</p>
+            <p><strong>📝 Location Description:</strong> ${t.description}</p>
+          </div>
+        </div>
+
+        <div>
+          <div class="ai-insight-box">
+            <div class="ai-tag">✨ GEMINI MULTIMODAL ANALYSIS</div>
+            <p style="font-size:13px; margin-bottom:6px;"><strong>Classified Trade:</strong> ${t.aiTriage.trade}</p>
+            <p style="font-size:13px; margin-bottom:6px;"><strong>AI Urgency Rating:</strong> ${t.aiTriage.score}</p>
+            <p style="font-size:13px; margin-bottom:6px; color:#b91c1c;"><strong>Hazard Flag:</strong> ${t.aiTriage.hazard}</p>
+            <p style="font-size:12.5px;"><strong>Recommended Parts/Tools:</strong> ${t.aiTriage.tools}</p>
+          </div>
+
+          <div style="margin-top:14px;">
+            <label class="field-label">ASSIGN CONTRACTOR / MAINTENANCE TEAM</label>
+            <select id="modalContractor" class="select-ctrl" style="margin-bottom:12px;">
+              <option value="Ah Meng Plumbing & Pipe Services" ${t.contractor.includes('Plumbing') ? 'selected' : ''}>Ah Meng Plumbing & Pipe Services</option>
+              <option value="Ah Meng Aircond Services" ${t.contractor.includes('Aircond') ? 'selected' : ''}>Ah Meng Aircond Services</option>
+              <option value="Campus Electrical Response Team" ${t.contractor.includes('Electrical') ? 'selected' : ''}>Campus Electrical Response Team</option>
+              <option value="Campus Carpentry Team" ${t.contractor.includes('Carpentry') ? 'selected' : ''}>Campus Carpentry Team</option>
+            </select>
+
+            <label class="field-label">UPDATE WORK ORDER STATUS</label>
+            <select id="modalStatus" class="select-ctrl" style="margin-bottom:18px;">
+              <option value="PENDING" ${t.status === 'PENDING' ? 'selected' : ''}>PENDING TRIAGE</option>
+              <option value="DISPATCHED" ${t.status === 'DISPATCHED' ? 'selected' : ''}>DISPATCHED TO CONTRACTOR</option>
+              <option value="RESOLVED" ${t.status === 'RESOLVED' ? 'selected' : ''}>RESOLVED & VERIFIED</option>
+            </select>
+
+            <button class="btn-orange-submit" style="width:100%;" onclick="saveDispatchUpdate('${t.id}')">
+              ✓ Update Status & Notify Student
+            </button>
+          </div>
+        </div>
+      `;
+
+      document.getElementById("inspectModal").classList.add("open");
+    }
+
+    function saveDispatchUpdate(ticketId) {
+      const idx = tickets.findIndex(t => t.id === ticketId);
+      if (idx > -1) {
+        tickets[idx].contractor = document.getElementById("modalContractor").value;
+        tickets[idx].status = document.getElementById("modalStatus").value;
+        saveTickets();
+        renderDirectory();
+        closeInspectModal();
+      }
+    }
+
+    function closeInspectModal() {
+      document.getElementById("inspectModal").classList.remove("open");
+    }
+
+    initializeStaffAccount();
+    initializeStaffNavigation();
+    updateStats();
+    renderFloorplanPins();
+    renderDirectory();
+  </script>
+</body>
+</html>

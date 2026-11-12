@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HostelKaki | Maintenance Issue Reporting</title>
+  <!-- Google Fonts: Inter & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#eef8ff',
+              100: '#d9f0ff',
+              200: '#bce4ff',
+              300: '#8ed2ff',
+              400: '#56b8ff',
+              500: '#2b98ff',
+              600: '#1579f5',
+              700: '#0e60e1',
+              800: '#124db6',
+              900: '#15438f',
+              950: '#112957',
+            },
+            accent: {
+              500: '#ff6b35',
+              600: '#e85924',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col transition-colors duration-200">
+
+  <!-- ================= FLOATING NAVIGATION DRAWER TRIGGER (ARROW BUTTON) ================= -->
+  <div id="sidebar-toggle-container" class="fixed left-0 top-1/2 -translate-y-1/2 z-40">
+    <button id="sidebar-open-btn" aria-label="Open Navigation Menu" title="Open Menu" 
+      class="group flex items-center bg-brand-600 hover:bg-brand-700 text-white pl-2 pr-3 py-3 rounded-r-2xl shadow-xl transition-all duration-300 transform hover:scale-105 hover:translate-x-1 focus:outline-none focus:ring-4 focus:ring-brand-300">
+      <svg class="w-6 h-6 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
+      </svg>
+      <span class="text-xs font-bold uppercase tracking-wider ml-1 hidden sm:inline-block">Menu</span>
+    </button>
+  </div>
+
+  <!-- BACKDROP OVERLAY -->
+  <div id="drawer-backdrop" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 opacity-0 pointer-events-none transition-opacity duration-300"></div>
+
+  <!-- SLIDE-OUT NAVIGATION DRAWER -->
+  <aside id="nav-drawer" class="fixed top-0 left-0 bottom-0 w-80 max-w-[85vw] bg-white shadow-2xl z-50 transform -translate-x-full transition-transform duration-300 ease-in-out flex flex-col border-r border-slate-100">
+    <!-- Drawer Header -->
+    <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-brand-900 to-brand-800 text-white">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center text-xl font-black text-brand-300 border border-white/20">
+          HK
+        </div>
+        <div>
+          <h2 class="font-extrabold text-lg tracking-tight leading-tight">HostelKaki</h2>
+          <p class="text-xs text-brand-200">Residential Portal</p>
+        </div>
+      </div>
+      <!-- Close Arrow Button -->
+      <button id="sidebar-close-btn" aria-label="Close Navigation Menu" class="p-2 rounded-lg hover:bg-white/10 text-white transition-colors focus:outline-none">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- User Profile Badge in Drawer -->
+    <div class="p-4 bg-slate-50 border-b border-slate-100">
+      <div class="flex items-center space-x-3">
+        <div id="user-avatar" class="w-11 h-11 rounded-full bg-brand-100 text-brand-700 font-bold flex items-center justify-center text-base border-2 border-brand-200">
+          ST
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center space-x-2">
+            <span id="user-display-name" class="font-semibold text-slate-800 text-sm truncate">Alex Tan</span>
+            <span id="user-role-badge" class="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full bg-brand-100 text-brand-700">Student</span>
+          </div>
+          <p id="user-unit-info" class="text-xs text-slate-500 truncate">Room: Block A - 302</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Links -->
+    <nav class="flex-1 overflow-y-auto p-4 space-y-1.5">
+      <a href="#home" data-view="home" class="nav-link active flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-slate-700 hover:bg-brand-50 hover:text-brand-700 transition-all">
+        <svg class="w-5 h-5 text-slate-400 group-hover:text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+        </svg>
+        <span class="flex-1">Home</span>
+      </a>
+
+      <a href="#report" data-view="report" class="nav-link flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-slate-700 hover:bg-brand-50 hover:text-brand-700 transition-all">
+        <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+        <span id="drawer-nav-report-label" class="flex-1">Submit Report</span>
+        <span id="report-count-badge" class="px-2 py-0.5 text-xs font-bold rounded-full bg-orange-100 text-orange-700">3</span>
+      </a>
+
+      <a href="#news" data-view="news" class="nav-link flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-slate-700 hover:bg-brand-50 hover:text-brand-700 transition-all">
+        <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path>
+        </svg>
+        <span class="flex-1">News & Notices</span>
+        <span class="w-2 h-2 rounded-full bg-red-500"></span>
+      </a>
+
+      <a href="#settings" data-view="settings" class="nav-link flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-slate-700 hover:bg-brand-50 hover:text-brand-700 transition-all">
+        <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+        </svg>
+        <span class="flex-1">Settings</span>
+      </a>
+      <a href="staff.html" class="flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-slate-700 hover:bg-brand-50 hover:text-brand-700 transition-all">
+        <span class="w-5 text-center text-slate-400" aria-hidden="true">🔧</span>
+        <span class="flex-1">Facility Staff Portal</span>
+      </a>
+    </nav>
+
+    <!-- Drawer Footer Actions -->
+    <div class="p-4 border-t border-slate-100 bg-slate-50 space-y-2">
+      <button id="quick-role-toggle-btn" class="w-full text-xs font-semibold py-2 px-3 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 flex items-center justify-between transition-colors">
+        <span>Active Role: <strong id="current-role-label">Student</strong></span>
+        <span class="text-brand-600 font-bold">Switch ⇄</span>
+      </button>
+
+      <button id="nav-login-btn" class="w-full py-2.5 px-4 rounded-xl text-sm font-semibold text-white bg-slate-800 hover:bg-slate-900 flex items-center justify-center space-x-2 transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+        </svg>
+        <span id="auth-btn-text">Sign In / Switch Account</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ================= TOP HEADER BAR ================= -->
+  <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <!-- Left side: Toggle button hint & Logo -->
+      <div class="flex items-center space-x-3">
+        <button id="header-menu-btn" class="p-2 rounded-xl text-slate-600 hover:text-brand-600 hover:bg-slate-100 transition-colors focus:outline-none" title="Toggle Navigation Bar">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
+        </button>
+        <div class="flex items-center space-x-2 cursor-pointer" onclick="navigate('home')">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 to-brand-400 flex items-center justify-center text-white font-extrabold shadow-md shadow-brand-500/20">
+            HK
+          </div>
+          <div>
+            <span class="font-extrabold text-lg tracking-tight text-slate-900">Hostel<span class="text-brand-600">Kaki</span></span>
+            <span class="hidden md:inline-block ml-2 text-xs font-semibold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">Residential Portal</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Nav for Desktop -->
+      <nav class="hidden md:flex items-center space-x-1 font-medium text-sm">
+        <button onclick="navigate('home')" class="header-nav-btn px-3 py-1.5 rounded-lg text-slate-600 hover:text-brand-600 hover:bg-slate-100 transition-colors" data-target="home">Home</button>
+        <button onclick="navigate('report')" class="header-nav-btn px-3 py-1.5 rounded-lg text-slate-600 hover:text-brand-600 hover:bg-slate-100 transition-colors" data-target="report">
+          <span id="header-nav-report-label">Submit Report</span>
+        </button>
+        <button onclick="navigate('news')" class="header-nav-btn px-3 py-1.5 rounded-lg text-slate-600 hover:text-brand-600 hover:bg-slate-100 transition-colors" data-target="news">News</button>
+        <button onclick="navigate('settings')" class="header-nav-btn px-3 py-1.5 rounded-lg text-slate-600 hover:text-brand-600 hover:bg-slate-100 transition-colors" data-target="settings">Settings</button>
+      </nav>
+
+      <!-- Right Side: User & Auth Trigger -->
+      <div class="flex items-center space-x-3">
+        <button id="open-report-quick-btn" onclick="openNewReportForm()" class="hidden sm:inline-flex items-center space-x-1.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-sm hover:shadow transition-all">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path>
+          </svg>
+          <span>New Report</span>
+        </button>
+
+        <button id="header-user-btn" onclick="openLoginModal()" class="flex items-center space-x-2 pl-2 pr-3 py-1.5 rounded-full border border-slate-200 hover:border-brand-300 hover:bg-slate-50 transition-all">
+          <div id="header-avatar" class="w-7 h-7 rounded-full bg-brand-600 text-white text-xs font-bold flex items-center justify-center">
+            ST
+          </div>
+          <span id="header-user-name" class="text-xs font-bold text-slate-700">Alex Tan</span>
+          <span id="header-role-pill" class="text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-brand-100 text-brand-700">Student</span>
+        </button>
+        <a id="staff-directory-quick-btn" href="staff.html" class="hidden sm:inline-flex items-center px-3.5 py-2 rounded-xl border border-brand-200 bg-brand-50 text-brand-700 hover:bg-brand-100 text-xs font-bold transition-colors">
+          Staff Report Directory
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= MAIN CONTENT VIEWS ================= -->
+  <main class="flex-1">
+
+    <!-- 1. HOME VIEW (MAIN MENU / HERO SCREEN) -->
+    <section id="view-home" class="page-view">
+      <!-- Hero Section -->
+      <div class="relative overflow-hidden bg-gradient-to-b from-brand-900 via-brand-800 to-slate-900 text-white py-20 lg:py-28 px-4 sm:px-6 lg:px-8">
+        <!-- Background Pattern -->
+        <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:20px_20px] pointer-events-none"></div>
+        <div class="absolute -top-40 -right-40 w-96 h-96 bg-brand-500/20 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-40 -left-40 w-96 h-96 bg-accent-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="max-w-4xl mx-auto text-center relative z-10">
+          <div class="inline-flex items-center space-x-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-brand-200 text-xs font-semibold uppercase tracking-wider mb-6 animate-pulse">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+            <span>24/7 Hostel Facility Support</span>
+          </div>
+
+          <!-- Main Hero Title -->
+          <h1 class="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white mb-6">
+            Hostel<span class="text-brand-400">Kaki</span>
+          </h1>
+
+          <!-- Hero Subtitle -->
+          <p class="text-xl sm:text-2xl text-slate-200 font-medium max-w-2xl mx-auto mb-10 leading-relaxed">
+            "An application to report your findings of a maintenance issue"
+          </p>
+
+          <!-- Middle Hero Report Button -->
+          <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <button id="hero-report-btn" onclick="openNewReportForm()" 
+              class="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-accent-500 to-orange-500 hover:from-accent-600 hover:to-orange-600 text-white font-extrabold text-lg shadow-xl shadow-orange-500/30 transform hover:-translate-y-1 hover:shadow-2xl transition-all duration-200 flex items-center justify-center space-x-3">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+              </svg>
+              <span>Report Issue Now</span>
+            </button>
+
+            <button onclick="navigate('report')" 
+              class="w-full sm:w-auto px-6 py-4 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-base backdrop-blur-md border border-white/20 transition-all flex items-center justify-center space-x-2">
+              <svg class="w-5 h-5 text-brand-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+              </svg>
+              <span id="hero-secondary-btn-text">View Reports & Tracker</span>
+            </button>
+          </div>
+
+          <!-- Quick Stats / Indicators -->
+          <div class="grid grid-cols-3 gap-4 max-w-xl mx-auto mt-14 pt-10 border-t border-white/10 text-center">
+            <div>
+              <div id="stat-active" class="text-2xl sm:text-3xl font-extrabold text-orange-400">4</div>
+              <div class="text-xs text-slate-300 font-medium mt-1">Pending Fixes</div>
+            </div>
+            <div>
+              <div id="stat-resolved" class="text-2xl sm:text-3xl font-extrabold text-emerald-400">18</div>
+              <div class="text-xs text-slate-300 font-medium mt-1">Resolved This Week</div>
+            </div>
+            <div>
+              <div class="text-2xl sm:text-3xl font-extrabold text-brand-300">&lt; 4 hrs</div>
+              <div class="text-xs text-slate-300 font-medium mt-1">Average Response</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature Highlights -->
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div class="text-center max-w-2xl mx-auto mb-12">
+          <h2 class="text-3xl font-bold text-slate-900">How HostelKaki Works</h2>
+          <p class="text-slate-600 mt-2">Simple, swift, and confidential hostel maintenance management for residents and staff.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <!-- Step 1 -->
+          <div class="bg-white p-7 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow">
+            <div class="w-12 h-12 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center mb-5 font-bold text-xl">
+              📸
+            </div>
+            <h3 class="text-lg font-bold text-slate-900 mb-2">Snap Media Evidence</h3>
+            <p class="text-sm text-slate-600 leading-relaxed">
+              Snap a clear photo of the broken tap, flickering light, or damaged furniture. Optional video capture gives technicians full context.
+            </p>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="bg-white p-7 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow">
+            <div class="w-12 h-12 rounded-xl bg-orange-50 text-accent-500 flex items-center justify-center mb-5 font-bold text-xl">
+              🗺️
+            </div>
+            <h3 class="text-lg font-bold text-slate-900 mb-2">Interactive Floorplan Pin</h3>
+            <p class="text-sm text-slate-600 leading-relaxed">
+              Click directly on the interactive floorplan diagram to pin the exact location so repair staff don't have to guess where to go.
+            </p>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="bg-white p-7 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow">
+            <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-5 font-bold text-xl">
+              🎫
+            </div>
+            <h3 class="text-lg font-bold text-slate-900 mb-2">Auto Ticket ID & Staff Portal</h3>
+            <p class="text-sm text-slate-600 leading-relaxed">
+              Every report automatically generates an official Ticket ID. Facility staff can search and manage tickets securely from their staff portal.
+            </p>
+          </div>
+        </div>
+
+        <!-- Emergency Contacts Bar -->
+        <div class="mt-12 bg-amber-50 border border-amber-200 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div class="flex items-center space-x-4">
+            <div class="w-12 h-12 rounded-xl bg-amber-500 text-white flex items-center justify-center text-xl flex-shrink-0">
+              🚨
+            </div>
+            <div>
+              <h4 class="font-bold text-amber-950">Urgent Maintenance Emergencies?</h4>
+              <p class="text-xs text-amber-800">For active pipe bursts, electrical sparks, or lockouts, call hostel security immediately.</p>
+            </div>
+          </div>
+          <div class="flex items-center space-x-3">
+            <a href="tel:0389991234" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl shadow-sm transition-colors flex items-center space-x-1.5">
+              <span>📞 Hotline: 03-8999 1234</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. REPORT & INCIDENT VIEW -->
+    <section id="view-report" class="page-view hidden py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      
+      <!-- Top Action Bar -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <div>
+          <div class="flex items-center space-x-2">
+            <h1 id="report-view-title" class="text-2xl sm:text-3xl font-extrabold text-slate-900">Report Maintenance Issue</h1>
+            <span id="role-view-badge" class="px-2.5 py-0.5 text-xs font-bold rounded-full bg-brand-100 text-brand-700">Resident Portal</span>
+          </div>
+          <p id="report-view-subtitle" class="text-sm text-slate-600 mt-1">Submit maintenance tickets with media and floorplan pinning. Reports are securely handled by facility staff.</p>
+        </div>
+        <div class="flex items-center space-x-3">
+          <button id="toggle-new-report-btn" onclick="toggleReportForm()" 
+            class="px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm shadow-md shadow-brand-500/20 flex items-center space-x-2 transition-all">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path>
+            </svg>
+            <span id="form-toggle-text">Submit New Report</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ================= REPORT SUBMISSION FORM (COLLAPSIBLE / MODAL FORM) ================= -->
+      <div id="report-form-panel" class="mb-10 bg-white rounded-2xl border-2 border-brand-200 shadow-xl overflow-hidden transition-all">
+        <div class="bg-gradient-to-r from-brand-800 to-brand-700 px-6 py-4 text-white flex items-center justify-between">
+          <div class="flex items-center space-x-2">
+            <span class="text-xl">📝</span>
+            <h2 class="text-lg font-bold">New Maintenance Incident Report</h2>
+          </div>
+          <button onclick="toggleReportForm(false)" class="text-white/80 hover:text-white p-1 rounded-lg hover:bg-white/10" title="Collapse Form">
+            ✕
+          </button>
+        </div>
+
+        <form id="incident-report-form" class="p-6 sm:p-8 space-y-8" onsubmit="handleReportSubmit(event)">
+          
+          <!-- 1. DATE & TIME + PHONE NUMBER -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Date & Time -->
+            <div>
+              <label for="incident-datetime" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                Date and Time of Incident <span class="text-red-500">*</span>
+              </label>
+              <div class="relative">
+                <input type="datetime-local" id="incident-datetime" required
+                  class="w-full px-4 py-3 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm font-medium text-slate-800 transition-colors">
+              </div>
+              <p class="text-[11px] text-slate-500 mt-1">Pre-filled with the current date & time.</p>
+            </div>
+
+            <!-- Phone Number -->
+            <div>
+              <label for="incident-phone" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                Contact Phone Number <span class="text-red-500">*</span>
+              </label>
+              <div class="relative">
+                <input type="tel" id="incident-phone" required placeholder="e.g. +60 12-345 6789"
+                  class="w-full px-4 py-3 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm font-medium text-slate-800 transition-colors">
+              </div>
+              <p class="text-[11px] text-slate-500 mt-1">Staff will contact or WhatsApp this number for updates.</p>
+            </div>
+          </div>
+
+          <!-- 2. LOCATION OF REPORTED INCIDENT (Unit Number & Others Option) -->
+          <div class="space-y-4">
+            <div>
+              <label for="incident-location-type" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                Location of Reported Incident <span class="text-red-500">*</span>
+              </label>
+              <select id="incident-location-type" onchange="handleLocationTypeChange()" required
+                class="w-full px-4 py-3 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm font-medium text-slate-800 transition-colors">
+                <option value="" disabled selected>-- Select Incident Location --</option>
+                <optgroup label="Residential Units (Block A)">
+                  <option value="Block A - Room 101">Block A - Room 101</option>
+                  <option value="Block A - Room 102">Block A - Room 102</option>
+                  <option value="Block A - Room 201">Block A - Room 201</option>
+                  <option value="Block A - Room 202">Block A - Room 202</option>
+                  <option value="Block A - Room 301">Block A - Room 301</option>
+                  <option value="Block A - Room 302">Block A - Room 302</option>
+                </optgroup>
+                <optgroup label="Residential Units (Block B)">
+                  <option value="Block B - Room 101">Block B - Room 101</option>
+                  <option value="Block B - Room 102">Block B - Room 102</option>
+                  <option value="Block B - Room 201">Block B - Room 201</option>
+                  <option value="Block B - Room 202">Block B - Room 202</option>
+                </optgroup>
+                <optgroup label="Hostel Common Facilities">
+                  <option value="Common Area - Pantry / Kitchenette">Common Area - Pantry / Kitchenette</option>
+                  <option value="Common Area - Laundry Room">Common Area - Laundry Room</option>
+                  <option value="Common Area - Washroom & Showers">Common Area - Washroom & Showers</option>
+                  <option value="Common Area - Study Lounge">Common Area - Study Lounge</option>
+                  <option value="Common Area - Lift Lobby & Stairs">Common Area - Lift Lobby & Stairs</option>
+                </optgroup>
+                <option value="Others" class="font-bold text-accent-500">Others (Specify below)</option>
+              </select>
+            </div>
+
+            <!-- "OTHERS" SPECIFY FIELD (Conditional) -->
+            <div id="incident-location-other-wrapper" class="hidden">
+              <label for="incident-location-other" class="block text-xs font-bold uppercase tracking-wider text-accent-600 mb-1.5">
+                Specify Custom Location Details <span class="text-red-500">*</span>
+              </label>
+              <input type="text" id="incident-location-other" placeholder="e.g. Block C carpark entrance, Corridor outside Room 405"
+                class="w-full px-4 py-3 rounded-xl border border-orange-300 bg-orange-50/40 focus:bg-white focus:ring-2 focus:ring-accent-500 text-sm font-medium text-slate-800 transition-colors">
+            </div>
+          </div>
+
+          <!-- 3. MAPPED FLOORPLAN LOCATION (CLICK TO SELECT LOCATION) -->
+          <div class="bg-slate-50 p-5 sm:p-6 rounded-2xl border border-slate-200">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-800">
+                  Mapped Floorplan Location (Click to Select) <span class="text-red-500">*</span>
+                </label>
+                <p class="text-xs text-slate-500">Click anywhere on the hostel layout to plant a location pin.</p>
+              </div>
+              <div class="flex items-center space-x-2">
+                <span class="text-xs font-semibold text-slate-600">Floor:</span>
+                <select id="floorplan-level" onchange="changeFloorplanLevel()" class="text-xs font-bold px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-700">
+                  <option value="1">Level 1 (Ground)</option>
+                  <option value="2">Level 2</option>
+                  <option value="3" selected>Level 3</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Interactive Floorplan Canvas / SVG Container -->
+            <div class="relative bg-white border border-slate-300 rounded-xl overflow-hidden shadow-inner cursor-crosshair select-none" id="floorplan-container">
+              <!-- SVG Interactive Blueprint -->
+              <svg id="hostel-floorplan-svg" viewBox="0 0 800 450" class="w-full h-auto max-h-[380px] bg-slate-900 block" onclick="handleFloorplanClick(event)">
+                <defs>
+                  <pattern id="grid-pattern" width="20" height="20" patternUnits="userSpaceOnUse">
+                    <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#1e293b" stroke-width="0.8"/>
+                  </pattern>
+                </defs>
+                <rect width="800" height="450" fill="#0f172a"/>
+                <rect width="800" height="450" fill="url(#grid-pattern)"/>
+
+                <!-- Outer Hostel Shell -->
+                <rect x="40" y="30" width="720" height="390" rx="12" fill="#1e293b" stroke="#475569" stroke-width="3"/>
+                
+                <!-- Central Hallway / Corridor -->
+                <rect x="50" y="190" width="700" height="70" fill="#334155" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4"/>
+                <text x="400" y="230" fill="#94a3b8" font-size="13" font-family="sans-serif" font-weight="bold" text-anchor="middle" letter-spacing="3">MAIN CORRIDOR & WALKWAY</text>
+
+                <!-- TOP ROW OF ROOMS -->
+                <g class="room-zone" data-room-name="Room 301 (Single En-suite)" data-room-number="01">
+                  <rect x="50" y="40" width="130" height="150" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5" class="hover:fill-sky-950 transition-colors"/>
+                  <text class="room-number" x="115" y="105" fill="#e2e8f0" font-size="13" font-weight="bold" text-anchor="middle">Room 301</text>
+                  <text x="115" y="125" fill="#38bdf8" font-size="10" text-anchor="middle">Single Unit</text>
+                </g>
+                <g class="room-zone" data-room-name="Room 302 (Twin Sharing)" data-room-number="02">
+                  <rect x="180" y="40" width="130" height="150" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5" class="hover:fill-sky-950 transition-colors"/>
+                  <text class="room-number" x="245" y="105" fill="#e2e8f0" font-size="13" font-weight="bold" text-anchor="middle">Room 302</text>
+                  <text x="245" y="125" fill="#38bdf8" font-size="10" text-anchor="middle">Twin Unit</text>
+                </g>
+                <g class="room-zone" data-room-name="Common Bath & Showers">
+                  <rect x="310" y="40" width="180" height="150" fill="#134e4a" stroke="#2dd4bf" stroke-width="1.5" class="hover:fill-teal-900 transition-colors"/>
+                  <text x="400" y="105" fill="#ccfbf1" font-size="13" font-weight="bold" text-anchor="middle">🚿 Common Bath</text>
+                  <text x="400" y="125" fill="#2dd4bf" font-size="10" text-anchor="middle">Showers & Restrooms</text>
+                </g>
+                <g class="room-zone" data-room-name="Room 303 (Twin Sharing)" data-room-number="03">
+                  <rect x="490" y="40" width="130" height="150" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5" class="hover:fill-sky-950 transition-colors"/>
+                  <text class="room-number" x="555" y="105" fill="#e2e8f0" font-size="13" font-weight="bold" text-anchor="middle">Room 303</text>
+                  <text x="555" y="125" fill="#38bdf8" font-size="10" text-anchor="middle">Twin Unit</text>
+                </g>
+                <g class="room-zone" data-room-name="Floor Pantry & Microwave Station">
+                  <rect x="620" y="40" width="130" height="150" fill="#713f12" stroke="#facc15" stroke-width="1.5" class="hover:fill-amber-950 transition-colors"/>
+                  <text x="685" y="105" fill="#fef08a" font-size="13" font-weight="bold" text-anchor="middle">🍳 Pantry</text>
+                  <text x="685" y="125" fill="#facc15" font-size="10" text-anchor="middle">Sink & Water Filter</text>
+                </g>
+
+                <!-- BOTTOM ROW OF ROOMS -->
+                <g class="room-zone" data-room-name="Room 304 (Single Unit)" data-room-number="04">
+                  <rect x="50" y="260" width="130" height="150" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5" class="hover:fill-sky-950 transition-colors"/>
+                  <text class="room-number" x="115" y="335" fill="#e2e8f0" font-size="13" font-weight="bold" text-anchor="middle">Room 304</text>
+                  <text x="115" y="355" fill="#38bdf8" font-size="10" text-anchor="middle">Single Unit</text>
+                </g>
+                <g class="room-zone" data-room-name="Resident Study Lounge">
+                  <rect x="180" y="260" width="220" height="150" fill="#312e81" stroke="#818cf8" stroke-width="1.5" class="hover:fill-indigo-950 transition-colors"/>
+                  <text x="290" y="335" fill="#e0e7ff" font-size="13" font-weight="bold" text-anchor="middle">📚 Study Lounge</text>
+                  <text x="290" y="355" fill="#818cf8" font-size="10" text-anchor="middle">Tables & Power Outlets</text>
+                </g>
+                <g class="room-zone" data-room-name="Laundry Room (Washer / Dryer)">
+                  <rect x="400" y="260" width="160" height="150" fill="#064e3b" stroke="#34d399" stroke-width="1.5" class="hover:fill-emerald-950 transition-colors"/>
+                  <text x="480" y="335" fill="#d1fae5" font-size="13" font-weight="bold" text-anchor="middle">🧺 Laundry Room</text>
+                  <text x="480" y="355" fill="#34d399" font-size="10" text-anchor="middle">Washers & Dryers</text>
+                </g>
+                <g class="room-zone" data-room-name="Room 305 (Corner Suite)" data-room-number="05">
+                  <rect x="560" y="260" width="190" height="150" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5" class="hover:fill-sky-950 transition-colors"/>
+                  <text class="room-number" x="655" y="335" fill="#e2e8f0" font-size="13" font-weight="bold" text-anchor="middle">Room 305</text>
+                  <text x="655" y="355" fill="#38bdf8" font-size="10" text-anchor="middle">Corner Suite</text>
+                </g>
+
+                <!-- DYNAMIC PIN (Hidden until user clicks) -->
+                <g id="floorplan-pin" class="hidden transition-all duration-300">
+                  <circle cx="0" cy="0" r="12" fill="#ea580c" stroke="#ffffff" stroke-width="2.5"/>
+                  <circle cx="0" cy="0" r="4" fill="#ffffff"/>
+                  <text id="pin-label" x="0" y="-18" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.8))">📍 Issue Location</text>
+                </g>
+              </svg>
+            </div>
+
+            <!-- Floorplan Selected Status Bar -->
+            <div class="mt-3 flex flex-col sm:flex-row sm:items-center justify-between text-xs text-slate-600 gap-2">
+              <div class="flex items-center space-x-2">
+                <span class="font-bold text-slate-700">Selected Pin:</span>
+                <span id="floorplan-selection-text" class="px-2.5 py-1 rounded-md bg-amber-100 text-amber-800 font-medium">
+                  None (Please click on the blueprint above)
+                </span>
+              </div>
+              <button type="button" onclick="clearFloorplanPin()" id="clear-pin-btn" class="hidden text-red-600 hover:text-red-700 font-bold underline">
+                Reset Pin
+              </button>
+            </div>
+            <input type="hidden" id="incident-floorplan-coords" required>
+          </div>
+
+          <!-- 4. IMAGE UPLOAD (MANDATORY) & VIDEO UPLOAD (OPTIONAL) -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            <!-- IMAGE UPLOAD (MUST HAVE) -->
+            <div class="space-y-2">
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                Photo Evidence <span class="text-red-500">* (Mandatory)</span>
+              </label>
+              
+              <div id="image-drop-area" class="border-2 border-dashed border-brand-300 hover:border-brand-500 rounded-2xl p-5 text-center bg-brand-50/30 hover:bg-brand-50/60 transition-all cursor-pointer relative">
+                <input type="file" id="incident-image" accept="image/*" required class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" onchange="handleImageSelect(event)">
+                
+                <!-- Placeholder display -->
+                <div id="image-upload-placeholder" class="space-y-2 py-4">
+                  <div class="w-12 h-12 rounded-full bg-brand-100 text-brand-600 mx-auto flex items-center justify-center text-2xl">
+                    📷
+                  </div>
+                  <div class="text-xs font-bold text-slate-700">Click or Drag & Drop Image Here</div>
+                  <p class="text-[11px] text-slate-500">Supports JPG, PNG, WEBP (Required)</p>
+                </div>
+
+                <!-- Preview display -->
+                <div id="image-preview-container" class="hidden relative">
+                  <img id="image-preview-element" src="" alt="Incident Photo Preview" class="max-h-48 rounded-xl mx-auto shadow-md object-cover border border-slate-200">
+                  <button type="button" onclick="removeImageUpload(event)" class="absolute top-2 right-2 p-1.5 rounded-full bg-red-600 text-white shadow hover:bg-red-700 text-xs font-bold" title="Remove Photo">
+                    ✕
+                  </button>
+                  <p class="text-[11px] text-emerald-600 font-bold mt-2">✓ Photo attached successfully</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- VIDEO UPLOAD (OPTIONAL) -->
+            <div class="space-y-2">
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                Video Evidence <span class="text-slate-400 font-normal">(Optional)</span>
+              </label>
+              
+              <div id="video-drop-area" class="border-2 border-dashed border-slate-300 hover:border-slate-400 rounded-2xl p-5 text-center bg-slate-50 hover:bg-slate-100/60 transition-all cursor-pointer relative">
+                <input type="file" id="incident-video" accept="video/mp4,video/webm,video/quicktime" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" onchange="handleVideoSelect(event)">
+                
+                <!-- Placeholder display -->
+                <div id="video-upload-placeholder" class="space-y-2 py-4">
+                  <div class="w-12 h-12 rounded-full bg-slate-200 text-slate-600 mx-auto flex items-center justify-center text-2xl">
+                    🎥
+                  </div>
+                  <div class="text-xs font-bold text-slate-700">Click or Drag & Drop Video</div>
+                  <p class="text-[11px] text-slate-500">MP4, WebM (Short clip showing leak/noise)</p>
+                </div>
+
+                <!-- Preview display -->
+                <div id="video-preview-container" class="hidden relative">
+                  <video id="video-preview-element" controls class="max-h-48 rounded-xl mx-auto shadow-md border border-slate-200"></video>
+                  <button type="button" onclick="removeVideoUpload(event)" class="absolute top-2 right-2 p-1.5 rounded-full bg-red-600 text-white shadow hover:bg-red-700 text-xs font-bold" title="Remove Video">
+                    ✕
+                  </button>
+                  <p class="text-[11px] text-emerald-600 font-bold mt-2">✓ Video attached (Optional)</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- 5. LOCATION DESCRIPTION & CATEGORY -->
+          <div class="space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <!-- Issue Category -->
+              <div>
+                <label for="incident-category" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                  Issue Category <span class="text-red-500">*</span>
+                </label>
+                <select id="incident-category" required
+                  class="w-full px-4 py-3 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-brand-500 text-sm font-medium text-slate-800">
+                  <option value="Plumbing & Water">💧 Plumbing & Water Leak</option>
+                  <option value="Electrical & Lighting">💡 Electrical & Lighting</option>
+                  <option value="Air Conditioning">❄️ Air Conditioning & Fan</option>
+                  <option value="Furniture & Fixtures">🪑 Furniture & Bedframe</option>
+                  <option value="Doors, Windows & Lock">🔑 Doors, Windows & Lockset</option>
+                  <option value="Cleanliness & Pest">🐜 Cleanliness & Pest Control</option>
+                  <option value="Other Issue">⚙️ Other Issue</option>
+                </select>
+              </div>
+
+              <!-- Severity / Urgency -->
+              <div>
+                <label for="incident-urgency" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                  Urgency Level <span class="text-red-500">*</span>
+                </label>
+                <select id="incident-urgency" required
+                  class="w-full px-4 py-3 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-brand-500 text-sm font-medium text-slate-800">
+                  <option value="Normal">🟢 Normal (Fix within 48 hours)</option>
+                  <option value="Medium">🟡 Medium (Fix within 24 hours)</option>
+                  <option value="Urgent">🔴 Urgent (Hazard / Active Leak / Power Outage)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Description Textarea -->
+            <div>
+              <label for="incident-description" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                Location Description & Problem Details <span class="text-red-500">*</span>
+              </label>
+              <textarea id="incident-description" rows="4" required placeholder="Describe the maintenance issue clearly. Mention exact spots (e.g., pipe dripping beneath the basin, ceiling discoloration, door handle loose)..."
+                class="w-full px-4 py-3 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm font-medium text-slate-800 transition-colors"></textarea>
+            </div>
+          </div>
+
+          <!-- Form Submit Action Bar -->
+          <div class="pt-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-end gap-3">
+            <button type="button" onclick="toggleReportForm(false)" class="w-full sm:w-auto px-6 py-3 rounded-xl border border-slate-300 text-slate-700 font-bold text-sm hover:bg-slate-100 transition-colors">
+              Cancel
+            </button>
+            <button type="submit" class="w-full sm:w-auto px-8 py-3 rounded-xl bg-accent-500 hover:bg-accent-600 text-white font-extrabold text-sm shadow-lg shadow-orange-500/25 transition-all flex items-center justify-center space-x-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+              </svg>
+              <span>Submit Maintenance Ticket</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- ================= SECTION A: STUDENT ACCESS VIEW (RESTRICTED DIRECTORY + TICKET TRACKER) ================= -->
+      <div id="student-access-section" class="space-y-8">
+        
+        <!-- Privacy Notice Banner -->
+        <div class="bg-gradient-to-r from-slate-900 to-slate-800 rounded-2xl p-6 sm:p-8 text-white shadow-lg border border-slate-700 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div class="flex items-start space-x-4">
+            <div class="w-12 h-12 rounded-2xl bg-white/10 text-brand-300 flex items-center justify-center text-2xl flex-shrink-0 border border-white/10">
+              🔒
+            </div>
+            <div>
+              <div class="flex items-center space-x-2 mb-1">
+                <h3 class="text-lg font-bold text-white">Staff-Only Maintenance Directory</h3>
+                <span class="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase bg-amber-400 text-slate-900">Confidential</span>
+              </div>
+              <p class="text-xs text-slate-300 leading-relaxed max-w-2xl">
+                To protect student resident privacy and security, the comprehensive maintenance incident directory is restricted exclusively to authorized Facility Staff and Wardens. Students can track their personal issues using their unique auto-generated <strong>Ticket ID</strong> below.
+              </p>
+            </div>
+          </div>
+          <button onclick="openLoginModal()" class="w-full md:w-auto px-5 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/20 text-xs font-bold transition-colors whitespace-nowrap flex items-center justify-center space-x-2">
+            <span>Switch to Staff Account ⇄</span>
+          </button>
+        </div>
+
+        <!-- Student Ticket ID Lookup Card -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm">
+          <div class="max-w-2xl">
+            <div class="flex items-center space-x-2 text-brand-600 mb-2">
+              <span class="text-xl">🔍</span>
+              <h3 class="text-base font-extrabold uppercase tracking-wide text-slate-900">Track Your Reported Ticket</h3>
+            </div>
+            <p class="text-xs text-slate-600 mb-5">
+              Enter the Ticket ID provided upon submission (e.g., <code class="font-bold text-brand-600 bg-brand-50 px-1.5 py-0.5 rounded">HK-2026-1082</code>) to check the real-time status and technician updates of your report.
+            </p>
+            
+            <form onsubmit="handleStudentTicketSearch(event)" class="flex flex-col sm:flex-row gap-3">
+              <div class="relative flex-1">
+                <input type="text" id="student-search-input" placeholder="Enter Ticket ID (e.g. HK-2026-1082)..."
+                  class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 text-sm font-mono uppercase tracking-wider font-semibold">
+              </div>
+              <button type="submit" class="px-6 py-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm shadow-md transition-all">
+                Track Ticket
+              </button>
+            </form>
+          </div>
+
+          <!-- Single Ticket Result Container for Students -->
+          <div id="student-ticket-result-container" class="mt-6 hidden">
+            <!-- Dynamically populated if found -->
+          </div>
+        </div>
+
+        <!-- Student's Personal Submitted Reports (Session / My Reports) -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+          <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+            <div>
+              <h3 class="text-base font-bold text-slate-900">My Submitted Reports</h3>
+              <p class="text-xs text-slate-500">Tickets submitted by <strong id="student-my-name">Alex Tan</strong></p>
+            </div>
+            <span id="student-my-count" class="px-2.5 py-1 rounded-full text-xs font-bold bg-brand-50 text-brand-700">1 Report</span>
+          </div>
+
+          <div id="student-my-reports-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-6">
+            <!-- Populated dynamically via app.js -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ================= SECTION B: STAFF DIRECTORY VIEW (VISIBLE ONLY FOR STAFF) ================= -->
+      <div id="staff-directory-section" class="hidden bg-white rounded-2xl border border-slate-200 shadow-sm p-6 mb-8">
+        
+        <!-- Staff Banner Info -->
+        <div class="bg-orange-50 border border-orange-200 rounded-xl p-4 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-center space-x-3">
+            <span class="text-2xl">🔧</span>
+            <div>
+              <h3 class="text-xs font-extrabold uppercase tracking-wide text-orange-950">Staff Portal: Full Resident Incident Directory</h3>
+              <p class="text-[11px] text-orange-800">You are logged in as Facility Staff. You have administrative access to view, search, and update all student reports.</p>
+            </div>
+          </div>
+          <span class="px-2.5 py-1 rounded-md text-[10px] font-extrabold uppercase tracking-wider bg-orange-600 text-white flex-shrink-0">Staff Access</span>
+        </div>
+
+        <!-- Filter & Ticket ID Search Controls -->
+        <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 pb-6 border-b border-slate-100">
+          
+          <!-- Search box explicitly emphasizing Ticket ID -->
+          <div class="relative flex-1">
+            <svg class="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+            <input type="text" id="directory-search" oninput="renderReportList()" placeholder="🔍 Search by Ticket ID (e.g. HK-2026-1082) or Unit, Location, Keyword..."
+              class="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 font-medium">
+          </div>
+
+          <!-- Status Filters -->
+          <div class="flex flex-wrap items-center gap-2">
+            <button onclick="setFilterStatus('all')" class="status-filter-btn active px-3.5 py-2 rounded-xl text-xs font-bold border transition-all" data-status="all">All (<span id="count-all">0</span>)</button>
+            <button onclick="setFilterStatus('Pending')" class="status-filter-btn px-3.5 py-2 rounded-xl text-xs font-bold border transition-all" data-status="Pending">Pending (<span id="count-pending">0</span>)</button>
+            <button onclick="setFilterStatus('In Progress')" class="status-filter-btn px-3.5 py-2 rounded-xl text-xs font-bold border transition-all" data-status="In Progress">In Progress (<span id="count-progress">0</span>)</button>
+            <button onclick="setFilterStatus('Resolved')" class="status-filter-btn px-3.5 py-2 rounded-xl text-xs font-bold border transition-all" data-status="Resolved">Resolved (<span id="count-resolved">0</span>)</button>
+          </div>
+        </div>
+
+        <!-- Directory Cards / Grid -->
+        <div id="reports-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-6">
+          <!-- Dynamically populated via app.js -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="reports-empty-state" class="hidden py-16 text-center">
+          <div class="w-16 h-16 rounded-full bg-slate-100 text-slate-400 mx-auto flex items-center justify-center text-3xl mb-3">
+            📭
+          </div>
+          <h3 class="text-base font-bold text-slate-700">No reports found</h3>
+          <p class="text-xs text-slate-500 mt-1">There are no reports matching your active search or Ticket ID filter.</p>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- 3. NEWS & NOTICES VIEW -->
+    <section id="view-news" class="page-view hidden py-8 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
+      <div class="mb-8">
+        <h1 class="text-3xl font-extrabold text-slate-900">Hostel Notices & Maintenance Schedule</h1>
+        <p class="text-sm text-slate-600 mt-1">Official updates from Hostel Facility Management and Warden Office.</p>
+      </div>
+
+      <div class="space-y-4">
+        <!-- Notice 1 -->
+        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col md:flex-row gap-5">
+          <div class="w-14 h-14 rounded-2xl bg-amber-100 text-amber-700 font-extrabold flex flex-col items-center justify-center flex-shrink-0 text-center">
+            <span class="text-xs uppercase">Nov</span>
+            <span class="text-lg leading-none">15</span>
+          </div>
+          <div class="flex-1">
+            <div class="flex items-center space-x-2 mb-1">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-amber-100 text-amber-800">Water Interruption Notice</span>
+              <span class="text-xs text-slate-400">Posted 2 days ago</span>
+            </div>
+            <h2 class="text-lg font-bold text-slate-900">Scheduled Water Tank Cleaning & Pipe Flushing (Block A & B)</h2>
+            <p class="text-sm text-slate-600 mt-1">
+              Please be informed that water supply will be temporarily stopped on Saturday, 15 Nov, from 9:00 AM to 2:00 PM for bi-annual high-pressure water tank sterilization. Residents are advised to store drinking water in advance.
+            </p>
+          </div>
+        </div>
+
+        <!-- Notice 2 -->
+        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col md:flex-row gap-5">
+          <div class="w-14 h-14 rounded-2xl bg-brand-100 text-brand-700 font-extrabold flex flex-col items-center justify-center flex-shrink-0 text-center">
+            <span class="text-xs uppercase">Nov</span>
+            <span class="text-lg leading-none">12</span>
+          </div>
+          <div class="flex-1">
+            <div class="flex items-center space-x-2 mb-1">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-brand-100 text-brand-800">Air-Con Servicing</span>
+              <span class="text-xs text-slate-400">Posted yesterday</span>
+            </div>
+            <h2 class="text-lg font-bold text-slate-900">Level 2 & 3 Air Conditioning Filter Replacement</h2>
+            <p class="text-sm text-slate-600 mt-1">
+              Contractors from Daikin Services will access common rooms and units from 10:00 AM to 4:00 PM. Please ensure clear walkway space around wall-mounted AC units.
+            </p>
+          </div>
+        </div>
+
+        <!-- Notice 3 -->
+        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col md:flex-row gap-5">
+          <div class="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-700 font-extrabold flex flex-col items-center justify-center flex-shrink-0 text-center">
+            <span class="text-xs uppercase">Nov</span>
+            <span class="text-lg leading-none">08</span>
+          </div>
+          <div class="flex-1">
+            <div class="flex items-center space-x-2 mb-1">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-100 text-emerald-800">Facility Upgrade</span>
+              <span class="text-xs text-slate-400">Completed</span>
+            </div>
+            <h2 class="text-lg font-bold text-slate-900">New Cashless Payment Terminals in Ground Floor Laundry Room</h2>
+            <p class="text-sm text-slate-600 mt-1">
+              All commercial washing machines and dryers now accept QR Pay, DuitNow, and Touch 'n Go e-wallet. Token exchange machines have been decommissioned.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. SETTINGS VIEW -->
+    <section id="view-settings" class="page-view hidden py-8 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
+      <div class="mb-8">
+        <h1 class="text-3xl font-extrabold text-slate-900">System & User Settings</h1>
+        <p class="text-sm text-slate-600 mt-1">Manage portal preferences, identity credentials, and data storage.</p>
+      </div>
+
+      <div class="space-y-6">
+        <!-- Active User Profile Card -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+          <h2 class="text-base font-bold text-slate-900 mb-4">Active Profile Info</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <span class="text-xs font-semibold text-slate-500">Name</span>
+              <p id="settings-name" class="text-sm font-bold text-slate-800">Alex Tan</p>
+            </div>
+            <div>
+              <span class="text-xs font-semibold text-slate-500">Role / Designation</span>
+              <p id="settings-role" class="text-sm font-bold text-brand-600">Student Resident</p>
+            </div>
+            <div>
+              <span class="text-xs font-semibold text-slate-500">Assigned Unit</span>
+              <p id="settings-unit" class="text-sm font-bold text-slate-800">Block A - Room 302</p>
+            </div>
+            <div>
+              <span class="text-xs font-semibold text-slate-500">Registered Phone</span>
+              <p id="settings-phone" class="text-sm font-bold text-slate-800">+60 12-345 6789</p>
+            </div>
+          </div>
+          <div class="mt-5 pt-4 border-t border-slate-100 flex gap-3">
+            <button onclick="openLoginModal()" class="px-4 py-2 rounded-xl bg-brand-50 hover:bg-brand-100 text-brand-700 font-bold text-xs transition-colors">
+              Switch Account / Role
+            </button>
+          </div>
+        </div>
+
+        <!-- Demonstration Reset / Data Management -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+          <h2 class="text-base font-bold text-slate-900 mb-2">Demo Data & Storage</h2>
+          <p class="text-xs text-slate-500 mb-4">
+            HostelKaki stores submitted tickets and sample data locally in your browser's LocalStorage. You can reset to default sample reports at any time.
+          </p>
+          <div class="flex flex-wrap gap-3">
+            <button onclick="resetDemoData()" class="px-4 py-2.5 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold text-xs transition-colors">
+              ↺ Reload Sample Maintenance Reports
+            </button>
+            <button onclick="clearAllData()" class="px-4 py-2.5 rounded-xl border border-red-200 bg-red-50 hover:bg-red-100 text-red-700 font-bold text-xs transition-colors">
+              🗑️ Clear All Saved Data
+            </button>
+          </div>
+        </div>
+
+        <!-- About HostelKaki -->
+        <div class="bg-slate-100 rounded-2xl p-6 text-xs text-slate-600">
+          <div class="font-bold text-slate-800 text-sm mb-1">HostelKaki v1.1.0</div>
+          <p>A smart residential maintenance reporting & floorplan mapping portal designed with role-based access control and automatic Ticket ID tracking.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================= TICKET CREATION SUCCESS RECEIPT MODAL (AUTO TICKET ID) ================= -->
+  <div id="ticket-success-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-300">
+    <div class="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-slate-100 overflow-hidden transform scale-95 transition-all duration-300 p-6 sm:p-8 text-center" id="ticket-success-card">
+      
+      <!-- Animated Success Icon -->
+      <div class="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center text-3xl mb-4 border-4 border-emerald-50">
+        ✓
+      </div>
+
+      <h2 class="text-2xl font-extrabold text-slate-900">Report Submitted!</h2>
+      <p class="text-xs text-slate-500 mt-1">Your maintenance request has been logged into the system.</p>
+
+      <!-- Auto Generated Ticket ID Display Box -->
+      <div class="my-6 p-5 rounded-2xl bg-gradient-to-br from-brand-50 to-sky-50 border-2 border-brand-200 text-center relative">
+        <span class="text-[10px] font-extrabold uppercase tracking-widest text-brand-700 block mb-1">Official Ticket ID</span>
+        <div id="success-ticket-id" class="text-3xl sm:text-4xl font-extrabold font-mono text-brand-900 tracking-wider">
+          HK-2026-0000
+        </div>
+        <p class="text-[11px] text-slate-600 mt-2">Facility Staff will use this Ticket ID to locate and service your issue.</p>
+        
+        <button id="copy-ticket-btn" onclick="copyCurrentTicketId()" class="mt-3 px-4 py-2 bg-white hover:bg-slate-50 text-brand-700 border border-brand-300 rounded-xl text-xs font-bold shadow-sm inline-flex items-center space-x-1.5 transition-all">
+          <span id="copy-ticket-icon">📋</span>
+          <span id="copy-ticket-label">Copy Ticket ID</span>
+        </button>
+      </div>
+
+      <!-- Ticket Summary Info -->
+      <div class="bg-slate-50 rounded-xl p-4 text-left text-xs space-y-1.5 border border-slate-200 mb-6">
+        <div class="flex justify-between">
+          <span class="text-slate-500">Location:</span>
+          <span id="success-ticket-location" class="font-bold text-slate-800">Block A - Room 302</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-500">Category:</span>
+          <span id="success-ticket-category" class="font-bold text-slate-800">Plumbing & Water Leak</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-500">Urgency:</span>
+          <span id="success-ticket-urgency" class="font-bold text-orange-600">Medium</span>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex flex-col sm:flex-row gap-3">
+        <button onclick="trackSpecificTicketFromModal()" class="flex-1 py-3 px-4 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-md transition-all">
+          Track This Ticket
+        </button>
+        <button onclick="closeTicketSuccessModal()" class="py-3 px-5 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold text-xs transition-colors">
+          Done
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= LOG-IN SCREEN MODAL (STUDENT & STAFF) ================= -->
+  <div id="login-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-300">
+    <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-slate-100 overflow-hidden transform scale-95 transition-all duration-300" id="login-modal-card">
+      
+      <!-- Modal Header -->
+      <div class="bg-gradient-to-r from-brand-900 to-brand-800 p-6 text-white text-center relative">
+        <button onclick="closeLoginModal()" class="absolute top-4 right-4 p-2 text-white/70 hover:text-white rounded-full hover:bg-white/10 text-sm">
+          ✕
+        </button>
+        <div class="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur border border-white/20 mx-auto flex items-center justify-center text-2xl font-black text-brand-300 mb-3">
+          HK
+        </div>
+        <h2 class="text-2xl font-extrabold tracking-tight">HostelKaki Portal</h2>
+        <p class="text-xs text-brand-200 mt-1">Select your account role to continue</p>
+
+        <!-- Role Selector Switch Tabs -->
+        <div class="flex bg-black/25 p-1 rounded-xl mt-5 border border-white/10">
+          <button id="role-tab-student" onclick="setLoginRole('student')" 
+            class="flex-1 py-2 text-xs font-extrabold rounded-lg transition-all bg-white text-brand-900 shadow">
+            🎓 Student Resident
+          </button>
+          <button id="role-tab-staff" onclick="setLoginRole('staff')" 
+            class="flex-1 py-2 text-xs font-extrabold rounded-lg transition-all text-white/80 hover:text-white">
+            🔧 Facility Staff
+          </button>
+        </div>
+      </div>
+
+      <!-- Modal Body -->
+      <form id="login-form" class="p-6 sm:p-8 space-y-4" onsubmit="handleLoginSubmit(event)">
+        
+        <!-- STUDENT FORM FIELDS -->
+        <div id="student-login-fields" class="space-y-4">
+          <div>
+            <label for="login-student-id" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+              Student ID / Matric #
+            </label>
+            <input type="text" id="login-student-id" value="STU-2024-8891" placeholder="e.g. STU-2024-8891"
+              class="w-full px-4 py-2.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-brand-500 text-sm">
+          </div>
+
+          <div>
+            <label for="login-student-name" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+              Student Full Name
+            </label>
+            <input type="text" id="login-student-name" value="Alex Tan" placeholder="Your Full Name"
+              class="w-full px-4 py-2.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-brand-500 text-sm">
+          </div>
+
+          <div>
+            <label for="login-student-room" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+              Assigned Room / Unit
+            </label>
+            <input type="text" id="login-student-room" value="Block A - Room 302" placeholder="e.g. Block A - Room 302"
+              class="w-full px-4 py-2.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-brand-500 text-sm">
+          </div>
+        </div>
+
+        <!-- STAFF FORM FIELDS (Hidden by default) -->
+        <div id="staff-login-fields" class="space-y-4 hidden">
+          <div>
+            <label for="login-staff-id" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+              Staff ID / Badge #
+            </label>
+            <input type="text" id="login-staff-id" value="STAFF-FAC-04" placeholder="e.g. STAFF-FAC-04"
+              class="w-full px-4 py-2.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-brand-500 text-sm">
+          </div>
+
+          <div>
+            <label for="login-staff-name" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+              Staff Name & Department
+            </label>
+            <input type="text" id="login-staff-name" value="Encik Rahman (Facilities Lead)" placeholder="e.g. Encik Rahman (Facilities Lead)"
+              class="w-full px-4 py-2.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-brand-500 text-sm">
+          </div>
+
+          <div>
+            <label for="login-staff-dept" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+              Facility Department
+            </label>
+            <select id="login-staff-dept" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-brand-500 text-sm">
+              <option value="Plumbing & Electrical Maintenance">Plumbing & Electrical Maintenance</option>
+              <option value="Warden & Residential Affairs">Warden & Residential Affairs</option>
+              <option value="Housekeeping & Sanitation">Housekeeping & Sanitation</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label for="login-password" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+            Access Password / PIN
+          </label>
+          <input type="password" id="login-password" value="••••••••" placeholder="Password"
+            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-brand-500 text-sm">
+          <p class="text-[10px] text-slate-400 mt-1">Demo login: Any password will authenticate.</p>
+        </div>
+
+        <button type="submit" class="w-full py-3.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-extrabold text-sm shadow-lg shadow-brand-500/25 transition-all mt-4">
+          Enter HostelKaki Portal
+        </button>
+
+        <!-- Quick 1-Click Fill Buttons for Convenience -->
+        <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+          <span class="text-slate-400">Quick Test Accounts:</span>
+          <div class="space-x-2">
+            <button type="button" onclick="quickFillAccount('student')" class="text-brand-600 font-bold hover:underline">Alex (Student)</button>
+            <span class="text-slate-300">|</span>
+            <button type="button" onclick="quickFillAccount('staff')" class="text-orange-600 font-bold hover:underline">Rahman (Staff)</button>
+          </div>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- ================= REPORT DETAIL MODAL ================= -->
+  <div id="report-detail-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-300">
+    <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-100 transform scale-95 transition-all duration-300 p-6 sm:p-8" id="report-detail-card">
+      <!-- Populated dynamically via app.js -->
+    </div>
+  </div>
+
+  <!-- ================= TOAST NOTIFICATION CONTAINER ================= -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+    <div class="bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center space-x-3 border border-slate-700">
+      <span id="toast-icon" class="text-xl">✅</span>
+      <span id="toast-message" class="text-sm font-semibold">Action completed successfully!</span>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="bg-white border-t border-slate-200 py-6 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-3">
+      <div class="flex items-center space-x-2">
+        <span class="font-extrabold text-slate-900">HostelKaki</span>
+        <span>— Residential Maintenance Management System</span>
+      </div>
+      <div>
+        <span>• Auto Ticket ID Tracking</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
