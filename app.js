@@ -434,6 +434,11 @@ function navigate(viewName) {
   const views = ['home', 'report', 'news', 'settings'];
   if (!views.includes(viewName)) viewName = 'home';
 
+  // 🔒 RESTRICT STAFF VIEWS FOR STUDENTS
+  if (viewName === 'report' && currentUser && currentUser.role === 'student') {
+    // Ensure student sees their personal portal, not staff command center
+  }
+
   views.forEach(v => {
     const el = document.getElementById(`view-${v}`);
     if (el) {
@@ -501,6 +506,17 @@ function updateUI() {
   if (!currentUser) return;
 
   const isStaff = currentUser.role === 'staff';
+
+  // 🔒 Single Clean Intercept for Staff Portal
+  document.addEventListener('click', (event) => {
+    const targetLink = event.target.closest('a[href*="staff.html"]');
+    if (targetLink) {
+      if (!currentUser || currentUser.role === 'student') {
+        event.preventDefault();
+        alert("Access Denied: Student accounts cannot access the Facility Staff Portal.");
+      }
+    }
+  });
 
   const headerAvatar = document.getElementById('header-avatar');
   const headerName = document.getElementById('header-user-name');

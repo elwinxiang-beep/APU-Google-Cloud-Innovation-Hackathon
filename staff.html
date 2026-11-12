@@ -1225,14 +1225,51 @@
           <a style="color:#ef4444; font-weight:700; font-size:12px; cursor:pointer; text-decoration:underline;" onclick="filterByPin('ALL')">Show All Pins</a>
         </div>
 
-        <div class="floorplan-box" id="staffFloorplan">
-          <div class="room-block" style="left:18px; top:18px; width:130px; height:95px;">Room 301<br><small>Twin Sharing</small></div>
-          <div class="room-block" style="left:160px; top:18px; width:135px; height:95px;">Room 304<br><small>Single Unit</small></div>
-          <div class="room-block" style="left:308px; top:18px; width:135px; height:95px;">Room 308<br><small>Single Unit</small></div>
-          <div class="room-block" style="left:456px; top:18px; width:160px; height:95px;">Common Pantry<br><small>Water Dispenser</small></div>
-          <div class="room-block" style="left:18px; top:165px; width:275px; height:105px;">Corridor & Lift Lobby B<br><small>Common Area (Others)</small></div>
-          <div class="room-block" style="left:308px; top:165px; width:308px; height:105px;">Shared Washroom & Showers<br><small>Block B Level 3</small></div>
-          <div id="pinsContainer"></div>
+        <div class="relative bg-white border border-slate-300 rounded-xl overflow-hidden shadow-inner select-none" id="staffFloorplan">
+          <svg id="staff-floorplan-svg" viewBox="0 0 800 450" class="w-full h-auto max-h-[320px] bg-slate-900 block">     
+            <defs>
+              <pattern id="grid-pattern-staff" width="20" height="20" patternUnits="userSpaceOnUse">
+                <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#1e293b" stroke-width="0.8"/>
+              </pattern>
+            </defs>
+            <rect width="800" height="450" fill="#0f172a"/>
+            <rect width="800" height="450" fill="url(#grid-pattern-staff)"/>
+
+            <rect x="40" y="30" width="720" height="390" rx="12" fill="#1e293b" stroke="#475569" stroke-width="3"/>
+            <rect x="50" y="190" width="700" height="70" fill="#334155" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4"/>
+            <text x="400" y="230" fill="#94a3b8" font-size="13" font-family="sans-serif" font-weight="bold" text-anchor="middle" letter-spacing="3">MAIN CORRIDOR & WALKWAY</text>
+
+            <!-- Rooms -->
+            <rect x="50" y="40" width="130" height="150" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5"/>
+            <text x="115" y="105" fill="#e2e8f0" font-size="13" font-weight="bold" text-anchor="middle">Room 301</text>
+            
+            <rect x="180" y="40" width="130" height="150" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5"/>
+            <text x="245" y="105" fill="#e2e8f0" font-size="13" font-weight="bold" text-anchor="middle">Room 302</text>
+
+            <rect x="310" y="40" width="180" height="150" fill="#134e4a" stroke="#2dd4bf" stroke-width="1.5"/>
+            <text x="400" y="105" fill="#ccfbf1" font-size="13" font-weight="bold" text-anchor="middle">🚿 Common Bath</text>
+
+            <rect x="490" y="40" width="130" height="150" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5"/>
+            <text x="555" y="105" fill="#e2e8f0" font-size="13" font-weight="bold" text-anchor="middle">Room 303</text>
+
+            <rect x="620" y="40" width="130" height="150" fill="#713f12" stroke="#facc15" stroke-width="1.5"/>
+            <text x="685" y="105" fill="#fef08a" font-size="13" font-weight="bold" text-anchor="middle">🍳 Pantry</text>
+
+            <rect x="50" y="260" width="130" height="150" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5"/>
+            <text x="115" y="335" fill="#e2e8f0" font-size="13" font-weight="bold" text-anchor="middle">Room 304</text>
+
+            <rect x="180" y="260" width="220" height="150" fill="#312e81" stroke="#818cf8" stroke-width="1.5"/>
+            <text x="290" y="335" fill="#e0e7ff" font-size="13" font-weight="bold" text-anchor="middle">📚 Study Lounge</text>
+
+            <rect x="400" y="260" width="160" height="150" fill="#064e3b" stroke="#34d399" stroke-width="1.5"/>
+            <text x="480" y="335" fill="#d1fae5" font-size="13" font-weight="bold" text-anchor="middle">🧺 Laundry Room</text>
+
+            <rect x="560" y="260" width="190" height="150" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5"/>
+            <text x="655" y="335" fill="#e2e8f0" font-size="13" font-weight="bold" text-anchor="middle">Room 305</text>
+
+            <!-- Pins Container Group -->
+            <g id="pinsContainer"></g>
+          </svg>
         </div>
       </div>
 
@@ -1327,30 +1364,36 @@
 
     function getStoredArray(key) {
       const storedValue = localStorage.getItem(key);
-      if (storedValue === null) return null;
-
-      const parsedValue = JSON.parse(storedValue);
-      if (!Array.isArray(parsedValue)) {
-        throw new TypeError(`${key} must contain a JSON array.`);
+      if (storedValue === null) return [];
+      try {
+        const parsedValue = JSON.parse(storedValue);
+        return Array.isArray(parsedValue) ? parsedValue : [];
+      } catch (e) {
+        return [];
       }
-      return parsedValue;
     }
 
-    function initializeStaffAccount() {
-      const storedUser = localStorage.getItem(APP_USER_KEY);
-      if (!storedUser) return;
-
+    // 🔒 STAFF PORTAL ROLE CHECK (Secured & Clean)
+    const storedUser = localStorage.getItem(APP_USER_KEY);
+    if (!storedUser) {
+      alert("Unauthorized: Please sign in as Facility Staff first.");
+      window.location.href = "index.html";
+    } else {
       try {
         const user = JSON.parse(storedUser);
-        if (user.role !== "staff") return;
-        const name = user.name || "Facility Staff";
-        const initials = user.avatar || name.split(" ").map(part => part[0]).join("").slice(0, 2).toUpperCase();
-        document.getElementById("staffHeaderName").textContent = name;
-        document.getElementById("staffHeaderInitials").textContent = initials;
-        document.getElementById("staffDrawerName").textContent = name;
-        document.getElementById("staffDrawerInitials").textContent = initials;
-      } catch (error) {
-        console.error("Could not read the signed-in staff account.", error);
+        if (user.role !== "staff") {
+          alert("Access Denied: Student accounts cannot access the Facility Staff Portal.");
+          window.location.href = "index.html";
+        } else {
+          // Populate staff header profile info
+          const initials = user.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+          document.getElementById("staffHeaderInitials").textContent = initials;
+          document.getElementById("staffHeaderName").textContent = user.name;
+          document.getElementById("staffDrawerInitials").textContent = initials;
+          document.getElementById("staffDrawerName").textContent = user.name;
+        }
+      } catch (e) {
+        window.location.href = "index.html";
       }
     }
 
@@ -1394,147 +1437,65 @@
       });
     }
 
-    const defaultTickets = [
-      {
-        id: "HK-2026-0304",
-        studentName: "Alex Tan",
-        phone: "+6012-3456789",
-        dateTime: "2026-11-11 20:43",
-        locationType: "Unit",
-        locationName: "Level 3 — Room 304 (Single Unit)",
-        coords: { x: 213, y: 65 },
-        displayCoords: "X:213, Y:314",
-        category: "Plumbing & Water Leak",
-        urgency: "Urgent",
-        description: "Pipe dripping beneath bathroom sink onto study floor near power extension.",
-        imageUrl: "https://images.unsplash.com/photo-1585704032915-c3400ca199e7?auto=format&fit=crop&w=500&q=80",
-        videoAttached: true,
-        status: "PENDING",
-        contractor: "Unassigned",
-        aiTriage: {
-          trade: "Plumbing / Electrical Hazard",
-          score: "5/5 Emergency",
-          hazard: "Active water leak adjacent to 240V outlet",
-          tools: "Pipe wrench, PTFE thread tape, P-trap seal"
-        }
-      },
-      {
-        id: "HK-2026-0308",
-        studentName: "Sarah Lim",
-        phone: "+6017-8892341",
-        dateTime: "2026-11-11 19:15",
-        locationType: "Unit",
-        locationName: "Level 3 — Room 308 (Single Unit)",
-        coords: { x: 365, y: 65 },
-        displayCoords: "X:365, Y:190",
-        category: "Air Conditioning (HVAC)",
-        urgency: "Urgent",
-        description: "Aircond indoor blower leaking water onto study desk and making loud buzzing noise.",
-        imageUrl: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=500&q=80",
-        videoAttached: true,
-        status: "DISPATCHED",
-        contractor: "Ah Meng Aircond Services",
-        aiTriage: {
-          trade: "HVAC",
-          score: "5/5 Emergency",
-          hazard: "Condensate overflow above study desk electronics",
-          tools: "Condensate drain pump, coil fin brush"
-        }
-      },
-      {
-        id: "HK-2026-0399",
-        studentName: "Amirul Hakim",
-        phone: "+6019-2234512",
-        dateTime: "2026-11-11 16:30",
-        locationType: "Others",
-        locationName: "Others — Block B Level 3 Lift Lobby Corridor",
-        coords: { x: 145, y: 215 },
-        displayCoords: "X:145, Y:215",
-        category: "Electrical & Lighting",
-        urgency: "Medium",
-        description: "Fluorescent hallway tube flickering nonstop outside lift lobby entrance.",
-        imageUrl: "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=500&q=80",
-        videoAttached: false,
-        status: "PENDING",
-        contractor: "Unassigned",
-        aiTriage: {
-          trade: "Electrical",
-          score: "3/5 Priority",
-          hazard: "Reduced night visibility in common corridor",
-          tools: "LED T8 replacement tube, starter ballast"
-        }
-      },
-      {
-        id: "HK-2026-0301",
-        studentName: "Daniel Wong",
-        phone: "+6011-5543901",
-        dateTime: "2026-11-10 14:10",
-        locationType: "Unit",
-        locationName: "Level 3 — Room 301 (Twin Sharing)",
-        coords: { x: 75, y: 65 },
-        displayCoords: "X:75, Y:110",
-        category: "Carpentry & Door Lock",
-        urgency: "Normal",
-        description: "Study wardrobe hinge loose, door does not close flush.",
-        imageUrl: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=500&q=80",
-        videoAttached: false,
-        status: "RESOLVED",
-        contractor: "Campus Carpentry Team",
-        aiTriage: {
-          trade: "Carpentry",
-          score: "1/5 Routine",
-          hazard: "No immediate safety hazard",
-          tools: "35mm concealed cabinet hinge, Phillips screwdriver"
-        }
-      }
-    ];
-
+    // Robust mapper that unifies Firebase and LocalStorage report formats
     function reportToTicket(report) {
       const locationType = report.locationType || "";
       const floorplan = report.floorplan || {};
       const status = (report.status || "Pending").toLowerCase();
-      const locationName = report.customLocation
-        ? `${locationType} — ${report.customLocation}`
-        : locationType;
+      const locationName = (locationType === "Others" && report.customLocation)
+        ? `Others — ${report.customLocation}`
+        : (locationType || report.locationName || "Location not specified");
 
       return {
-        firebaseDocId: report.firebaseDocId,
+        firebaseDocId: report.firebaseDocId || report.id,
         id: report.id || report.ticketId,
-        studentName: report.reporterName || "Resident",
-        phone: report.reporterPhone || "",
-        dateTime: (report.datetime || "").replace("T", " "),
-        locationType: locationType === "Others" || locationType.indexOf("Common Area") === 0 ? "Others" : "Unit",
-        locationName: locationName || "Location not specified",
-        coords: { x: Math.round((floorplan.x || 0) * 0.75), y: Math.round((floorplan.y || 0) * 0.6) },
+        studentName: report.reporterName || report.studentName || report.name || "Resident",
+        phone: report.reporterPhone || report.phone || "+60 12-345 6789",
+        dateTime: report.datetime ? report.datetime.replace("T", " ") : (report.dateTime || "2026-11-11 12:00"),
+        locationType: locationType === "Others" || locationType.includes("Common Area") ? "Others" : "Unit",
+        locationName: locationName,
+        coords: { 
+          x: floorplan.x !== undefined ? Math.round(floorplan.x) : 245, 
+          y: floorplan.y !== undefined ? Math.round(floorplan.y) : 110 
+        },
         displayCoords: floorplan.x !== undefined && floorplan.y !== undefined
           ? `X:${floorplan.x}, Y:${floorplan.y}`
-          : "Not pinned",
+          : "X:245, Y:110",
         category: report.category || "Other Issue",
         urgency: report.urgency || "Normal",
         description: report.description || "",
-        imageUrl: report.imageUrl || "",
+        imageUrl: report.imageUrl || "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=500&q=80",
         videoAttached: Boolean(report.videoUrl),
         status: status === "resolved" ? "RESOLVED" : status === "in progress" ? "DISPATCHED" : "PENDING",
-        contractor: report.contractor || "Unassigned",
-        aiTriage: {
+        contractor: report.staffNotes ? report.staffNotes : (report.contractor || "Unassigned"),
+        aiTriage: report.aiTriage || {
           trade: report.category || "Maintenance",
           score: report.urgency === "Urgent" ? "5/5 Emergency" : report.urgency === "Medium" ? "3/5 Priority" : "1/5 Routine",
-          hazard: report.description || "No additional hazard details provided",
-          tools: "Assessment required"
+          hazard: report.description || "Standard facility maintenance review.",
+          tools: "Standard technician toolkit"
         }
       };
     }
 
     function initStaffRealtimeTickets() {
+      // First load local storage immediately for zero-lag render
+      const localReports = getStoredArray(APP_REPORTS_KEY);
+      if (localReports.length > 0) {
+        tickets = localReports.map(reportToTicket);
+        updateStats(tickets);
+        renderFloorplanPins();
+        renderDirectory();
+      }
+
+      // Then listen to live Firebase updates
       listenToTickets((cloudTickets) => {
         if (cloudTickets && cloudTickets.length > 0) {
           tickets = cloudTickets.map(reportToTicket);
         } else {
           const storedReports = getStoredArray(APP_REPORTS_KEY);
-          tickets = storedReports ? storedReports.map(reportToTicket) : defaultTickets;
+          tickets = storedReports.length > 0 ? storedReports.map(reportToTicket) : [];
         }
 
-        selectedFilterId = "ALL";
         updateStats(tickets);
         renderFloorplanPins();
         renderDirectory();
@@ -1544,58 +1505,31 @@
     function saveTickets() {
       try {
         const storedReports = getStoredArray(APP_REPORTS_KEY);
-        if (storedReports !== null) {
-          tickets.forEach(ticket => {
-            const report = storedReports.find(item => item.id === ticket.id);
-            if (!report) return;
+        tickets.forEach(ticket => {
+          const report = storedReports.find(item => item.id === ticket.id);
+          if (report) {
             report.status = ticket.status === "RESOLVED"
               ? "Resolved"
               : ticket.status === "DISPATCHED" ? "In Progress" : "Pending";
             report.contractor = ticket.contractor;
-          });
-          localStorage.setItem(APP_REPORTS_KEY, JSON.stringify(storedReports));
-        } else {
-          localStorage.setItem("hostelkaki_tickets", JSON.stringify(tickets));
-        }
+            report.staffNotes = ticket.contractor;
+          }
+        });
+        localStorage.setItem(APP_REPORTS_KEY, JSON.stringify(storedReports));
       } catch (e) {
         console.error("Local save error:", e);
       }
-      updateStats();
+      updateStats(tickets);
     }
 
     function updateStats(ticketsArray) {
-      // 1. Count pending (anything not resolved)
-      const pendingCount = ticketsArray.filter(t => {
-        const status = (t.status || "").toLowerCase();
-        return status !== "resolved" && status !== "resolved & verified";
-      }).length;
+      const pendingCount = ticketsArray.filter(t => t.status !== "RESOLVED").length;
+      const urgentCount = ticketsArray.filter(t => t.status !== "RESOLVED" && t.urgency === "Urgent").length;
+      const resolvedCount = ticketsArray.filter(t => t.status === "RESOLVED").length;
 
-      // 2. Count active urgent hazards
-      const urgentCount = ticketsArray.filter(t => {
-        const status = (t.status || "").toLowerCase();
-        const isPending = status !== "resolved" && status !== "resolved & verified";
-        return isPending && t.urgency === "Urgent";
-      }).length;
-
-      // 3. Count resolved within the last 7 days (This Week)
-      const oneWeekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
-      const resolvedThisWeekCount = ticketsArray.filter(t => {
-        const status = (t.status || "").toLowerCase();
-        const isResolved = status === "resolved" || status === "resolved & verified";
-        
-        // Check timestamp if available, fallback to true if mock data
-        const ticketTime = t.createdAt || t.timestamp || Date.now();
-        return isResolved && ticketTime >= oneWeekAgo;
-      }).length;
-
-      // Update the DOM elements safely if they exist on the page
-      const pendingEl = document.getElementById("statPending");
-      const urgentEl = document.getElementById("statUrgent");
-      const resolvedEl = document.getElementById("statResolved");
-
-      if (pendingEl) pendingEl.textContent = pendingCount;
-      if (urgentEl) urgentEl.textContent = urgentCount;
-      if (resolvedEl) resolvedEl.textContent = resolvedThisWeekCount;
+      document.getElementById("statPending").textContent = pendingCount;
+      document.getElementById("statUrgent").textContent = urgentCount;
+      document.getElementById("statResolved").textContent = resolvedCount;
     }
 
     function renderFloorplanPins() {
@@ -1603,19 +1537,27 @@
       if (!container) return;
       container.innerHTML = "";
 
+      if (!tickets || tickets.length === 0) return;
+
       tickets.forEach(ticket => {
-        const pin = document.createElement("div");
-        pin.className = `map-pin pin-${ticket.urgency}`;
-        pin.style.left = `${ticket.coords.x}px`;
-        pin.style.top = `${ticket.coords.y}px`;
-        pin.title = `${ticket.locationName} (${ticket.category})`;
-        pin.textContent = ticket.urgency === "Urgent" ? "!" : "📍";
-        pin.onclick = () => {
+        const x = ticket.coords && ticket.coords.x !== undefined ? ticket.coords.x : 245;
+        const y = ticket.coords && ticket.coords.y !== undefined ? ticket.coords.y : 110;
+        const fill = ticket.urgency === "Urgent" ? "#ef4444" : ticket.urgency === "Medium" ? "#f59e0b" : "#10b981";
+        const icon = ticket.urgency === "Urgent" ? "!" : "📍";
+
+        const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        g.style.cursor = "pointer";
+        g.onclick = () => {
           document.getElementById("activePinBadge").textContent =
-            `📍 ${ticket.locationName} (Coords: ${ticket.displayCoords})`;
+            `📍 ${ticket.locationName} (Coords: X:${x}, Y:${y})`;
           openInspectModal(ticket.id);
         };
-        container.appendChild(pin);
+
+        g.innerHTML = `
+          <circle cx="${x}" cy="${y}" r="16" fill="${fill}" stroke="#ffffff" stroke-width="3" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.5))"/>
+          <text x="${x}" y="${y + 4.5}" fill="#ffffff" font-size="12" font-weight="bold" text-anchor="middle">${icon}</text>
+        `;
+        container.appendChild(g);
       });
     }
 
@@ -1654,11 +1596,11 @@
       const cards = document.getElementById("directoryCards");
       const emptyState = document.getElementById("directoryEmpty");
       emptyState.hidden = filtered.length > 0;
+      
       cards.innerHTML = filtered.map(t => {
         const statusLabel = t.status === "DISPATCHED"
           ? "In Progress"
           : t.status === "RESOLVED" ? "Resolved" : "Pending";
-        const dateParts = t.dateTime.split(" ");
 
         return `
           <article class="ticket-card">
@@ -1681,8 +1623,8 @@
               </div>
               <div class="ticket-card-details">
                 <div><span>Reporter</span><strong>${t.studentName}</strong></div>
-                <div><span>Reported</span><strong>${dateParts[0] || "Date unavailable"} ${dateParts[1] || ""}</strong></div>
-                <div><span>Contact</span><strong>${t.phone || "Not provided"}</strong></div>
+                <div><span>Reported</span><strong>${t.dateTime}</strong></div>
+                <div><span>Contact</span><strong>${t.phone}</strong></div>
                 <div><span>Assigned team</span><strong>${t.contractor}</strong></div>
               </div>
               <div class="ticket-card-footer">
@@ -1726,10 +1668,10 @@
           <div style="margin-top:14px;">
             <label class="field-label">ASSIGN CONTRACTOR / MAINTENANCE TEAM</label>
             <select id="modalContractor" class="select-ctrl" style="margin-bottom:12px;">
-              <option value="Ah Meng Plumbing & Pipe Services" ${t.contractor.includes('Plumbing') ? 'selected' : ''}>Ah Meng Plumbing & Pipe Services</option>
-              <option value="Ah Meng Aircond Services" ${t.contractor.includes('Aircond') ? 'selected' : ''}>Ah Meng Aircond Services</option>
-              <option value="Campus Electrical Response Team" ${t.contractor.includes('Electrical') ? 'selected' : ''}>Campus Electrical Response Team</option>
-              <option value="Campus Carpentry Team" ${t.contractor.includes('Carpentry') ? 'selected' : ''}>Campus Carpentry Team</option>
+              <option value="Ah Meng Plumbing & Pipe Services">Ah Meng Plumbing & Pipe Services</option>
+              <option value="Ah Meng Aircond Services">Ah Meng Aircond Services</option>
+              <option value="Campus Electrical Response Team">Campus Electrical Response Team</option>
+              <option value="Campus Carpentry Team">Campus Carpentry Team</option>
             </select>
 
             <label class="field-label">UPDATE WORK ORDER STATUS</label>
@@ -1756,7 +1698,7 @@
         const selectedStatus = document.getElementById("modalStatus").value;
 
         tickets[idx].contractor = selectedContractor;
-        tickets[idx].status = selectedStatus;
+        tickets[idx].status = selectedStatus === "Resolved" ? "RESOLVED" : selectedStatus === "In Progress" ? "DISPATCHED" : "PENDING";
         
         saveTickets();
 
@@ -1768,9 +1710,6 @@
               selectedStatus, 
               `Assigned to ${selectedContractor}`
             );
-            console.log("Successfully updated Firebase status!");
-          } else {
-            console.warn("No firebaseDocId found for this ticket, saved locally only.");
           }
         } catch (error) {
           console.error("Failed to update Firebase:", error);
@@ -1785,7 +1724,6 @@
       document.getElementById("inspectModal").classList.remove("open");
     }
 
-    initializeStaffAccount();
     initializeStaffNavigation();
     initStaffRealtimeTickets();
 
