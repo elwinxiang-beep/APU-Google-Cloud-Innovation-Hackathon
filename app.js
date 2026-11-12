@@ -1444,30 +1444,116 @@ function handleConciergeSubmit(event) {
   `;
   input.value = '';
 
-  // Generate smart response from live currentReports
+  // Generate smart response from live currentReports, file format queries, or ML urgency triage
   const qLower = query.toLowerCase();
+  const hasUrgentKeyword = /\b(?:fires?|spark(?:s|ed|ing)?|short[\s-]+circuits?|smoke|flood(?:s|ed|ing)?|leak(?:s|ed|ing)?|injur(?:y|ies|ed)|shatter(?:s|ed|ing)?|cannot\s+lock|broken\s+(?:window\s+)?glass)\b/i.test(query);
+  const hasBrokenKeyword = /\bbroken\b/i.test(query);
   let reply = '';
 
-  const matchedTicket = currentReports.find(r =>
+  // 1. Accepted File Formats Inquiry
+  if (qLower.includes('format') || qLower.includes('upload') || qLower.includes('file') || qLower.includes('photo') || qLower.includes('video') || qLower.includes('jpg') || qLower.includes('png') || qLower.includes('mp4') || qLower.includes('webm') || qLower.includes('media')) {
+    reply = `
+      <div class="space-y-2">
+        <div class="font-bold text-slate-900 flex items-center space-x-1.5 border-b border-slate-200 pb-1.5">
+          <span>📁</span>
+          <span>HostelKaki Upload & File Format Standards:</span>
+        </div>
+        <div class="bg-blue-50/80 p-2.5 rounded-xl border border-blue-100 text-slate-700">
+          <div class="font-bold text-blue-900 flex items-center space-x-1">
+            <span>📷</span> <span>Photo Evidence (Mandatory):</span>
+          </div>
+          <p class="text-[11px] mt-0.5">
+            Formats: <strong>.JPG, .JPEG, .PNG, .WEBP, .HEIC</strong><br>
+            Max Size: <strong>10MB</strong>. High-resolution photo required to verify physical defect.
+          </p>
+        </div>
+        <div class="bg-purple-50/80 p-2.5 rounded-xl border border-purple-100 text-slate-700">
+          <div class="font-bold text-purple-900 flex items-center space-x-1">
+            <span>🎥</span> <span>Video Evidence (Optional):</span>
+          </div>
+          <p class="text-[11px] mt-0.5">
+            Formats: <strong>.MP4, .WEBM, .MOV</strong><br>
+            Max Size: <strong>20MB (10–30s)</strong>. Recommended for active water leaks, sparks, or abnormal noises.
+          </p>
+        </div>
+        <div class="bg-emerald-50/80 p-2.5 rounded-xl border border-emerald-100 text-slate-700">
+          <div class="font-bold text-emerald-900 flex items-center space-x-1">
+            <span>📄</span> <span>Ticket & Audit Exports:</span>
+          </div>
+          <p class="text-[11px] mt-0.5">
+            Formats: <strong>.HTML, .JSON, .PDF</strong> with standardized ID (<code>#HK-2026-XXXX</code>).
+          </p>
+        </div>
+      </div>
+    `;
+  }
+  // 2. Ticket ID or Specific Room Query
+  else if (currentReports.find(r =>
     qLower.includes(r.id.toLowerCase()) ||
     (r.locationType && qLower.includes(r.locationType.toLowerCase().replace('block a - ', '').replace('common area - ', ''))) ||
     (qLower.includes('302') && r.locationType.includes('302')) ||
     (qLower.includes('301') && r.locationType.includes('301')) ||
     (qLower.includes('laundry') && r.locationType.toLowerCase().includes('laundry')) ||
     (qLower.includes('pantry') && r.locationType.toLowerCase().includes('pantry'))
-  );
-
-  if (matchedTicket) {
+  )) {
+    const matchedTicket = currentReports.find(r =>
+      qLower.includes(r.id.toLowerCase()) ||
+      (r.locationType && qLower.includes(r.locationType.toLowerCase().replace('block a - ', '').replace('common area - ', ''))) ||
+      (qLower.includes('302') && r.locationType.includes('302')) ||
+      (qLower.includes('301') && r.locationType.includes('301')) ||
+      (qLower.includes('laundry') && r.locationType.toLowerCase().includes('laundry')) ||
+      (qLower.includes('pantry') && r.locationType.toLowerCase().includes('pantry'))
+    );
     enrichReportWithAiTriage(matchedTicket);
     reply = `🎫 <strong>${matchedTicket.id} (${matchedTicket.locationType})</strong> is currently <strong>${matchedTicket.status}</strong>.<br>• <strong>AI Trade:</strong> ${matchedTicket.aiTriage.trade} (${matchedTicket.aiTriage.urgencyScore})<br>• <strong>Assigned Team:</strong> ${matchedTicket.aiTriage.contractor}<br>• <strong>Latest Note:</strong> ${matchedTicket.staffNotes || matchedTicket.aiTriage.aiSummary}`;
-  } else if (qLower.includes('urgent') || qLower.includes('emergency') || qLower.includes('hazard')) {
+  }
+  // 3. Emergency / Urgent Summary
+  else if (qLower.includes('urgent') || qLower.includes('emergency') || qLower.includes('hazard')) {
     const urgents = currentReports.filter(r => enrichReportWithAiTriage(r).aiTriage.urgencyBucket === 'Emergency' && r.status !== 'Resolved');
     reply = `🚨 There are currently <strong>${urgents.length} active Emergency hazard(s)</strong>:<br>` +
       urgents.map(u => `• <strong>${u.id}</strong> (${u.locationType}): ${u.aiTriage.hazard}`).join('<br>');
-  } else {
+  }
+  // 4. ML Incident Triage (Simulating train_model.py & chatbot.py logic)
+  else if (hasUrgentKeyword || hasBrokenKeyword || qLower.includes('pipe') || qLower.includes('burst') || qLower.includes('flood') || qLower.includes('spark') || qLower.includes('wire') || qLower.includes('smoke') || qLower.includes('fire') || qLower.includes('leak') || qLower.includes('aircond') || qLower.includes('air conditioner') || qLower.includes('fan') || qLower.includes('drawer') || qLower.includes('chair') || qLower.includes('lock') || qLower.includes('wifi') || qLower.includes('light') || qLower.includes('bulb')) {
+    // Determine urgency matching train_model.py dataset
+    let urgencyLevel = 'Normal';
+    let slaTime = 'Within 48 hours';
+    let badgeColor = 'bg-emerald-100 text-emerald-800 border-emerald-300';
+    let alertMsg = '[i] Request received. It will be scheduled into the regular maintenance queue.';
+
+    if (hasUrgentKeyword || qLower.includes('burst') || qLower.includes('burning') || qLower.includes('wire') || (!hasBrokenKeyword && qLower.includes('door') && qLower.includes('lock')) || qLower.includes('sewage') || qLower.includes('blackout')) {
+      urgencyLevel = 'Urgent';
+      slaTime = 'Immediately (Within 2 hours)';
+      badgeColor = 'bg-red-100 text-red-800 border-red-300';
+      alertMsg = '[!] ALERT: This issue is flagged as URGENT. Emergency technician/warden has been notified.';
+    } else if (hasBrokenKeyword || qLower.includes('aircond') || qLower.includes('air conditioner') || qLower.includes('wifi') || qLower.includes('flush') || qLower.includes('clogged') || qLower.includes('heater') || qLower.includes('fan') || qLower.includes('fridge')) {
+      urgencyLevel = 'Medium';
+      slaTime = 'Within 24 hours';
+      badgeColor = 'bg-amber-100 text-amber-800 border-amber-300';
+      alertMsg = '[*] Noted. A maintenance staff member will visit by tomorrow.';
+    }
+
+    const mockId = `HK-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+    reply = `
+      <div class="space-y-1.5">
+        <div class="flex items-center justify-between">
+          <span class="font-mono font-bold bg-slate-100 px-2 py-0.5 rounded text-slate-800">#${mockId}</span>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${badgeColor}">${urgencyLevel.toUpperCase()}</span>
+        </div>
+        <div class="text-xs text-slate-700"><strong>Reported Defect:</strong> "${query}"</div>
+        <div class="text-[11px] text-slate-600">⏱️ <strong>Resolution Target:</strong> ${slaTime}</div>
+        <div class="text-[11px] text-slate-600 bg-slate-50 p-2 rounded-lg border border-slate-200">${alertMsg}</div>
+        <div class="text-[10px] text-slate-500 pt-1">
+          📁 <em>Allowed upload formats in form: .JPG, .PNG, .WEBP (Photo) & .MP4 (Video).</em>
+        </div>
+      </div>
+    `;
+  }
+  // 5. Default General Overview
+  else {
     const pendingCount = currentReports.filter(r => r.status === 'Pending').length;
     const progressCount = currentReports.filter(r => r.status === 'In Progress').length;
-    reply = `📊 Across HostelKaki right now, we have <strong>${pendingCount} Pending</strong> and <strong>${progressCount} In-Progress</strong> tickets. You can ask me about a specific room (e.g. <em>"Room 302"</em>, <em>"Laundry Room"</em>) or Ticket ID (e.g. <em>"HK-2026-1082"</em>)!`;
+    reply = `📊 Across HostelKaki right now, we have <strong>${pendingCount} Pending</strong> and <strong>${progressCount} In-Progress</strong> tickets.<br><br>💡 <strong>You can ask me:</strong><br>• <em>"What file formats can I upload?"</em><br>• Describe an issue (e.g. <em>"Water pipe burst"</em>, <em>"AC blowing warm air"</em>)<br>• Search a room or Ticket ID (e.g. <em>"Room 302"</em>, <em>"HK-2026-1082"</em>)`;
   }
 
   setTimeout(() => {

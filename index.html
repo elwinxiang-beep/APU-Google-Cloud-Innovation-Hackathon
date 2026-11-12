@@ -128,6 +128,11 @@
         </svg>
         <span class="flex-1">Settings</span>
       </a>
+      <a href="#ai-concierge" onclick="toggleAiConcierge(true); closeSidebar(); return false;" class="flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-slate-700 hover:bg-brand-50 hover:text-brand-700 transition-all">
+        <span class="w-5 text-center text-base" aria-hidden="true">🤖</span>
+        <span class="flex-1">AI Concierge & Triage</span>
+        <span class="px-2 py-0.5 text-[10px] font-extrabold rounded-full bg-emerald-100 text-emerald-700">ML Bot</span>
+      </a>
       <a href="staff.html" class="flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-slate-700 hover:bg-brand-50 hover:text-brand-700 transition-all">
         <span class="w-5 text-center text-slate-400" aria-hidden="true">🔧</span>
         <span class="flex-1">Facility Staff Portal</span>
@@ -555,20 +560,33 @@
             
             <!-- IMAGE UPLOAD (MUST HAVE) -->
             <div class="space-y-2">
-              <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                Photo Evidence <span class="text-red-500">* (Mandatory)</span>
-              </label>
+              <div class="flex items-center justify-between">
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                  Photo Evidence <span class="text-red-500">* (Mandatory)</span>
+                </label>
+                <span class="text-[10px] font-bold text-brand-600 bg-brand-50 px-2 py-0.5 rounded-full border border-brand-200">
+                  Format: .JPG, .PNG, .WEBP
+                </span>
+              </div>
               
               <div id="image-drop-area" class="border-2 border-dashed border-brand-300 hover:border-brand-500 rounded-2xl p-5 text-center bg-brand-50/30 hover:bg-brand-50/60 transition-all cursor-pointer relative">
-                <input type="file" id="incident-image" accept="image/*" required class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" onchange="handleImageSelect(event)">
+                <input type="file" id="incident-image" accept="image/jpeg,image/png,image/webp,image/heic,image/*" required class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" onchange="handleImageSelect(event)">
                 
                 <!-- Placeholder display -->
-                <div id="image-upload-placeholder" class="space-y-2 py-4">
+                <div id="image-upload-placeholder" class="space-y-2 py-3">
                   <div class="w-12 h-12 rounded-full bg-brand-100 text-brand-600 mx-auto flex items-center justify-center text-2xl">
                     📷
                   </div>
-                  <div class="text-xs font-bold text-slate-700">Click or Drag & Drop Image Here</div>
-                  <p class="text-[11px] text-slate-500">Supports JPG, PNG, WEBP (Required)</p>
+                  <div class="text-xs font-bold text-slate-700">Click or Drag & Drop Photo Here</div>
+                  <p class="text-[11px] text-slate-500">Attach clear, well-lit visual proof of defect</p>
+                  <!-- Formats Pill Badges -->
+                  <div class="flex flex-wrap items-center justify-center gap-1.5 pt-1">
+                    <span class="px-2 py-0.5 rounded-md bg-blue-100 text-blue-800 text-[10px] font-extrabold">.JPG</span>
+                    <span class="px-2 py-0.5 rounded-md bg-blue-100 text-blue-800 text-[10px] font-extrabold">.PNG</span>
+                    <span class="px-2 py-0.5 rounded-md bg-blue-100 text-blue-800 text-[10px] font-extrabold">.WEBP</span>
+                    <span class="px-2 py-0.5 rounded-md bg-blue-100 text-blue-800 text-[10px] font-extrabold">.HEIC</span>
+                    <span class="px-2 py-0.5 rounded-md bg-slate-200 text-slate-700 text-[10px] font-bold">Max 10MB</span>
+                  </div>
                 </div>
 
                 <!-- Preview display -->
@@ -577,27 +595,39 @@
                   <button type="button" onclick="removeImageUpload(event)" class="absolute top-2 right-2 p-1.5 rounded-full bg-red-600 text-white shadow hover:bg-red-700 text-xs font-bold" title="Remove Photo">
                     ✕
                   </button>
-                  <p class="text-[11px] text-emerald-600 font-bold mt-2">✓ Photo attached successfully</p>
+                  <p class="text-[11px] text-emerald-600 font-bold mt-2">✓ Photo attached successfully (.jpg/.png/.webp format verified)</p>
                 </div>
               </div>
             </div>
 
             <!-- VIDEO UPLOAD (OPTIONAL) -->
             <div class="space-y-2">
-              <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                Video Evidence <span class="text-slate-400 font-normal">(Optional)</span>
-              </label>
+              <div class="flex items-center justify-between">
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                  Video Evidence <span class="text-slate-400 font-normal">(Optional)</span>
+                </label>
+                <span class="text-[10px] font-bold text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full border border-purple-200">
+                  Format: .MP4, .WEBM, .MOV
+                </span>
+              </div>
               
               <div id="video-drop-area" class="border-2 border-dashed border-slate-300 hover:border-slate-400 rounded-2xl p-5 text-center bg-slate-50 hover:bg-slate-100/60 transition-all cursor-pointer relative">
                 <input type="file" id="incident-video" accept="video/mp4,video/webm,video/quicktime" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" onchange="handleVideoSelect(event)">
                 
                 <!-- Placeholder display -->
-                <div id="video-upload-placeholder" class="space-y-2 py-4">
+                <div id="video-upload-placeholder" class="space-y-2 py-3">
                   <div class="w-12 h-12 rounded-full bg-slate-200 text-slate-600 mx-auto flex items-center justify-center text-2xl">
                     🎥
                   </div>
                   <div class="text-xs font-bold text-slate-700">Click or Drag & Drop Video</div>
-                  <p class="text-[11px] text-slate-500">MP4, WebM (Short clip showing leak/noise)</p>
+                  <p class="text-[11px] text-slate-500">Short clip showing active leak, sound, or flicker</p>
+                  <!-- Video Formats Pill Badges -->
+                  <div class="flex flex-wrap items-center justify-center gap-1.5 pt-1">
+                    <span class="px-2 py-0.5 rounded-md bg-purple-100 text-purple-800 text-[10px] font-extrabold">.MP4</span>
+                    <span class="px-2 py-0.5 rounded-md bg-purple-100 text-purple-800 text-[10px] font-extrabold">.WEBM</span>
+                    <span class="px-2 py-0.5 rounded-md bg-purple-100 text-purple-800 text-[10px] font-extrabold">.MOV</span>
+                    <span class="px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 text-[10px] font-bold">Max 20MB (≤ 60s)</span>
+                  </div>
                 </div>
 
                 <!-- Preview display -->
@@ -606,7 +636,61 @@
                   <button type="button" onclick="removeVideoUpload(event)" class="absolute top-2 right-2 p-1.5 rounded-full bg-red-600 text-white shadow hover:bg-red-700 text-xs font-bold" title="Remove Video">
                     ✕
                   </button>
-                  <p class="text-[11px] text-emerald-600 font-bold mt-2">✓ Video attached (Optional)</p>
+                  <p class="text-[11px] text-emerald-600 font-bold mt-2">✓ Video attached (.mp4/.webm format verified)</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- EXPLICIT SYSTEM FILE FORMAT SPECIFICATIONS REFERENCE CARD -->
+            <div class="col-span-1 md:col-span-2 bg-gradient-to-r from-blue-50/90 via-slate-50 to-indigo-50/90 rounded-2xl p-4 border border-blue-200/70 shadow-sm">
+              <div class="flex items-start space-x-3.5">
+                <div class="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center text-lg flex-shrink-0 shadow-sm">
+                  📁
+                </div>
+                <div class="flex-1 space-y-1.5">
+                  <div class="flex flex-wrap items-center justify-between gap-2">
+                    <h4 class="text-xs font-extrabold text-slate-900 uppercase tracking-wider">
+                      Official Portal File Format & Evidence Guidelines
+                    </h4>
+                    <span class="text-[10px] font-extrabold px-2.5 py-0.5 bg-brand-600 text-white rounded-full shadow-sm">
+                      HTML5 & AI Verified Formats
+                    </span>
+                  </div>
+                  <p class="text-xs text-slate-600 leading-relaxed">
+                    HostelKaki enforces strict file validation to assist facility contractors and warden triage. Please adhere to accepted file formats:
+                  </p>
+                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1.5">
+                    <div class="bg-white/95 p-3 rounded-xl border border-blue-100 shadow-xs">
+                      <div class="text-[11px] font-extrabold text-blue-900 flex items-center space-x-1.5 mb-1">
+                        <span>📷</span>
+                        <span>Photo File Formats (Required)</span>
+                      </div>
+                      <p class="text-[11px] text-slate-600 leading-tight">
+                        <strong>.JPG, .JPEG, .PNG, .WEBP, .HEIC</strong><br>
+                        <span class="text-slate-500">Max size 10MB. High-contrast photo of physical damage.</span>
+                      </p>
+                    </div>
+                    <div class="bg-white/95 p-3 rounded-xl border border-purple-100 shadow-xs">
+                      <div class="text-[11px] font-extrabold text-purple-900 flex items-center space-x-1.5 mb-1">
+                        <span>🎥</span>
+                        <span>Video File Formats (Optional)</span>
+                      </div>
+                      <p class="text-[11px] text-slate-600 leading-tight">
+                        <strong>.MP4, .WEBM, .MOV</strong><br>
+                        <span class="text-slate-500">Max size 20MB (10–30s). Visual proof for dripping, sparks, humming noise.</span>
+                      </p>
+                    </div>
+                    <div class="bg-white/95 p-3 rounded-xl border border-emerald-100 shadow-xs">
+                      <div class="text-[11px] font-extrabold text-emerald-900 flex items-center space-x-1.5 mb-1">
+                        <span>📄</span>
+                        <span>Receipt & Export Formats</span>
+                      </div>
+                      <p class="text-[11px] text-slate-600 leading-tight">
+                        <strong>.HTML, .JSON, .PDF</strong><br>
+                        <span class="text-slate-500">Official incident slips formatted with Monospace ID <code class="font-bold text-slate-900">#HK-2026-XXXX</code>.</span>
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1206,8 +1290,104 @@
     </div>
   </div>
 
+  <!-- ================= FLOATING AI CONCIERGE CHATBOX GUI WIDGET ================= -->
+  <!-- 1. Floating Launcher Button -->
+  <div id="ai-concierge-toggle-btn" class="fixed bottom-6 right-6 z-40 flex items-center">
+    <button onclick="toggleAiConcierge()" class="group flex items-center space-x-2.5 px-4 py-3 bg-gradient-to-r from-brand-600 via-blue-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white rounded-full shadow-2xl hover:shadow-brand-500/40 transition-all transform hover:-translate-y-0.5 border border-white/20 focus:outline-none" aria-label="Toggle AI Concierge Chatbot">
+      <span class="relative flex h-3 w-3">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+        <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+      </span>
+      <span class="text-xl">🤖</span>
+      <span class="text-xs font-extrabold tracking-wide hidden sm:inline">AI Concierge & Triage</span>
+    </button>
+  </div>
+
+  <!-- 2. AI Concierge Window (GUI) -->
+  <div id="ai-concierge-window" class="fixed bottom-20 right-4 sm:right-6 z-50 w-[92vw] sm:w-[420px] h-[580px] max-h-[85vh] bg-white rounded-3xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden hidden transition-all duration-300">
+    <!-- Chat Header -->
+    <div class="p-4 bg-gradient-to-r from-slate-900 via-slate-800 to-brand-950 text-white flex items-center justify-between border-b border-slate-800 flex-shrink-0">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-2xl bg-brand-600 flex items-center justify-center text-xl shadow-inner flex-shrink-0">
+          🤖
+        </div>
+        <div class="min-w-0">
+          <div class="flex items-center space-x-2">
+            <h3 class="font-extrabold text-sm text-white truncate">HostelKaki AI Concierge</h3>
+            <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex-shrink-0">
+              ● Online
+            </span>
+          </div>
+          <p class="text-[11px] text-slate-400 truncate">ML Urgency Triage & Media Format Assistant</p>
+        </div>
+      </div>
+      <div class="flex items-center space-x-1">
+        <button onclick="toggleAiConcierge(false)" class="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-colors text-sm font-bold" title="Minimize / Close">
+          ✕
+        </button>
+      </div>
+    </div>
+
+    <!-- Quick File Formats Pill Banner -->
+    <div class="bg-blue-50/90 px-4 py-2 border-b border-blue-100 flex items-center justify-between text-[11px] text-blue-900 flex-shrink-0">
+      <span class="flex items-center space-x-1 font-semibold truncate">
+        <span>📁</span>
+        <span>Accepted: <strong>JPG, PNG, WEBP</strong> (Photo) | <strong>MP4, WebM</strong> (Video)</span>
+      </span>
+      <button onclick="askConciergePreset('What file formats are accepted?')" class="text-blue-700 hover:underline font-bold text-[10px] whitespace-nowrap ml-2">
+        Specs Guide →
+      </button>
+    </div>
+
+    <!-- Preset Scenario Action Chips -->
+    <div class="p-2.5 bg-slate-100 border-b border-slate-200 flex items-center space-x-1.5 overflow-x-auto scrollbar-none flex-shrink-0">
+      <button onclick="askConciergePreset('What file formats can I upload?')" class="px-2.5 py-1 rounded-full bg-white hover:bg-slate-200 text-slate-700 text-[10px] font-bold shadow-xs border border-slate-300 whitespace-nowrap transition-colors">
+        📁 File Formats
+      </button>
+      <button onclick="askConciergePreset('Water pipe burst, room is flooding')" class="px-2.5 py-1 rounded-full bg-white hover:bg-slate-200 text-slate-700 text-[10px] font-bold shadow-xs border border-slate-300 whitespace-nowrap transition-colors">
+        🌊 Pipe Burst
+      </button>
+      <button onclick="askConciergePreset('Sparks coming out of the electrical outlet')" class="px-2.5 py-1 rounded-full bg-white hover:bg-slate-200 text-slate-700 text-[10px] font-bold shadow-xs border border-slate-300 whitespace-nowrap transition-colors">
+        ⚡ Spark / Shock
+      </button>
+      <button onclick="askConciergePreset('Air conditioner is blowing warm air')" class="px-2.5 py-1 rounded-full bg-white hover:bg-slate-200 text-slate-700 text-[10px] font-bold shadow-xs border border-slate-300 whitespace-nowrap transition-colors">
+        ❄️ AC Warm Air
+      </button>
+      <button onclick="askConciergePreset('How to track my ticket HK-2026-1082?')" class="px-2.5 py-1 rounded-full bg-white hover:bg-slate-200 text-slate-700 text-[10px] font-bold shadow-xs border border-slate-300 whitespace-nowrap transition-colors">
+        🎫 Track Ticket
+      </button>
+    </div>
+
+    <!-- Chat Messages Stream Area -->
+    <div id="ai-concierge-messages" class="flex-1 p-4 overflow-y-auto space-y-3 bg-slate-50/70 text-xs">
+      <!-- Welcome Message -->
+      <div class="bg-white p-3.5 rounded-2xl rounded-tl-sm border border-slate-200 text-slate-700 shadow-sm space-y-2">
+        <p class="font-bold text-slate-900 text-xs flex items-center space-x-1.5">
+          <span>👋</span> <span>Welcome to HostelKaki AI Concierge!</span>
+        </p>
+        <p class="text-xs text-slate-600 leading-relaxed">
+          I am powered by our trained machine learning classification model (<code class="bg-slate-100 px-1 py-0.5 rounded font-mono text-[10px]">train_model.py</code> & <code class="bg-slate-100 px-1 py-0.5 rounded font-mono text-[10px]">chatbot.py</code>).
+        </p>
+        <div class="bg-brand-50/60 p-2.5 rounded-xl border border-brand-100 text-[11px] text-slate-700 space-y-1">
+          <div>⚡ <strong>Incident Triage:</strong> Enter defects for immediate urgency rating & target SLA.</div>
+          <div>📁 <strong>File Formats:</strong> Ask about accepted photo and video formats in HTML.</div>
+          <div>🔍 <strong>Ticket Lookup:</strong> Check existing room defects or ticket numbers.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat Input Area -->
+    <form onsubmit="handleConciergeSubmit(event); return false;" class="p-3 bg-white border-t border-slate-200 flex items-center space-x-2 flex-shrink-0">
+      <input type="text" id="ai-concierge-input" placeholder="Type an issue or ask for file formats..." class="flex-1 px-4 py-2.5 rounded-xl border border-slate-300 bg-slate-50 text-xs font-medium text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all" autocomplete="off">
+      <button type="submit" class="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl shadow-md transition-colors flex items-center space-x-1">
+        <span>Send</span>
+        <span>🚀</span>
+      </button>
+    </form>
+  </div>
+
   <!-- ================= TOAST NOTIFICATION CONTAINER ================= -->
-  <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+  <div id="toast" class="fixed bottom-24 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
     <div class="bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center space-x-3 border border-slate-700">
       <span id="toast-icon" class="text-xl">✅</span>
       <span id="toast-message" class="text-sm font-semibold">Action completed successfully!</span>

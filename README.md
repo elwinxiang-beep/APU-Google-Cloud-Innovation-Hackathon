@@ -68,12 +68,84 @@ Use the **Switch Account** button (or drawer quick toggle):
    - Search by the Ticket ID in the search bar.
    - Change the status from `Pending` → `In Progress` → `Resolved` and add technician notes.
 
+### 5. 🤖 AI Maintenance Chatbot & Triage Console (Web GUI & Python GUI)
+- **Machine Learning Urgency Classifier**:
+  - Powered by `train_model.py` (TF-IDF Vectorizer + balanced Logistic Regression pipeline).
+  - Automatically classifies hostel incident reports into **Urgent** (within 2 hours), **Medium** (within 24 hours), or **Normal** (within 48 hours) with confidence score.
+  - Generates official standardized Ticket IDs (`#HK-2026-XXXX`).
+- **Interactive Web Chatbox Area (HTML & JS GUI)**:
+  - Accessible via floating launcher button `[🤖 AI Concierge & Triage]` and sidebar navigation.
+  - Features real-time status inquiry, emergency triage, and upload file format guidance.
+- **Dedicated Desktop Python GUI (`chatbot_gui.py`)**:
+  - High-DPI Windows Tkinter interface with styled chat bubbles, urgency badges, live retraining button, and HTML export.
+  - Seamlessly integrates `chatbot.py` and `train_model.py`.
+
+### 6. 📁 Strict File Format Specifications (HTML & Evidence Verification)
+- **Photo Evidence (Mandatory)**:
+  - Formats: `.jpg`, `.jpeg`, `.png`, `.webp`, `.heic`
+  - Specifications: Clear, well-lit photo of defect. Max file size: **10MB**.
+- **Video Evidence (Optional)**:
+  - Formats: `.mp4`, `.webm`, `.mov`
+  - Specifications: Short clip (10–30s) showing active leaks, electrical sparks, or abnormal fan/AC vibrations. Max file size: **20MB**.
+- **System Receipt & Export Formats**:
+  - Formats: `.html`, `.json`, `.pdf`
+  - Monospace Ticket ID tracking (`#HK-2026-XXXX`).
+
+---
+
+## 🚀 How to Run Locally
+
+### 1. Web Portal & Web Chatbot
+Double-click `index.html` to open it in Chrome, Edge, or any web browser.
+
+Or run a local server:
+```powershell
+python -m http.server 8000
+```
+Then visit **`http://localhost:8000`**. Click the bottom-right **[🤖 AI Concierge & Triage]** button to open the web chatbox!
+
+### 2. Python AI Chatbot GUI
+Launch the standalone Python desktop application:
+```powershell
+python chatbot_gui.py
+```
+Or run via `chatbot.py`:
+```powershell
+python chatbot.py --gui
+```
+(Terminal CLI mode: `python chatbot.py`)
+
+### 3. Retraining the ML Model
+To retrain the urgency classification model on demand:
+```powershell
+python train_model.py
+```
+Or click the **[🔄 Retrain ML Model]** button in the Python GUI.
+
+---
+
+## 👥 Testing the Perspectives & AI Chatbot
+
+1. **Student Mode (Alex Tan)**:
+   - Submit a report with photo/video conforming to accepted formats (`.jpg`, `.png`, `.mp4`).
+   - Note down the generated Ticket ID (e.g. `HK-2026-XXXX`).
+   - Open the **AI Concierge Chatbox** (bottom-right) and ask: *"What file formats can I upload?"* or test triage with *"Water pipe burst, room is flooding"*.
+2. **Staff Mode (Encik Rahman)**:
+   - Unlock the full directory!
+   - Search by the Ticket ID in the search bar.
+   - Change the status from `Pending` → `In Progress` → `Resolved` and add technician notes.
+
 # 🗂️2. Project File Structure
 
 ```text
 HostelKaki/
-├── index.html        # Unified Single-Page Application (Home, Report Form, Student Tracker, Warden Command Center & Modals)
-├── app.js            # Core state management, Firebase real-time sync, Gemini AI Triage engine, Kanban & Concierge logic
-├── styles.css        # Custom utility styles, animations, and modal transitions
+├── index.html        # Unified Single-Page Application (Home, Report Form, Student Tracker, AI Chatbox GUI & Modals)
+├── app.js            # Core state management, Firebase real-time sync, AI Concierge & Triage logic
+├── styles.css        # Custom styles, responsive scrollbars, glassmorphism & chat animations
 ├── firebase-db.js    # Firebase Firestore cloud database configuration & real-time listeners
+├── train_model.py    # Machine learning training pipeline (TF-IDF + Logistic Regression) saving hostel_urgency_model.joblib
+├── chatbot.py        # Chatbot core logic, SLA definitions, query triage & CLI interface
+├── chatbot_gui.py    # Standalone Python Desktop GUI for AI chatbox, triage, retraining & transcript export
+├── hostel_urgency_model.joblib # Serialized ML classification model artifact
 └── README.md         # Project documentation & hackathon guide
+```
