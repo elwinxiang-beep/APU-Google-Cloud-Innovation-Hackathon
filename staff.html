@@ -1212,14 +1212,21 @@
       <div class="card" id="floorplanSection">
         <div class="card-header">
           <div class="card-title">🗺️ Mapped Floorplan Incidents (Click Any Pin to Triage)</div>
-          <span style="font-size:12px; color:var(--text-muted);">Block B — Level 3 Residential Wing</span>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <label for="staff-floorplan-level" style="font-size:12px; font-weight:600; color:var(--text-muted);">Floor:</label>
+            <select id="staff-floorplan-level" class="select-ctrl" onchange="changeStaffFloor()" style="width:auto; padding:6px 10px;">
+              <option value="1">Level 1 (Ground)</option>
+              <option value="2">Level 2</option>
+              <option value="3" selected>Level 3</option>
+            </select>
+          </div>
         </div>
 
         <div class="selected-pin-bar">
           <div>
             <strong>Selected Pin:</strong>
             <span class="pin-green-badge" id="activePinBadge">
-              📍 Level 3 — Room 304 (Single Unit) (Coords: X:213, Y:314)
+              Select an incident pin to inspect it.
             </span>
           </div>
           <a style="color:#ef4444; font-weight:700; font-size:12px; cursor:pointer; text-decoration:underline;" onclick="filterByPin('ALL')">Show All Pins</a>
@@ -1241,22 +1248,22 @@
 
             <!-- Rooms -->
             <rect x="50" y="40" width="130" height="150" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5"/>
-            <text x="115" y="105" fill="#e2e8f0" font-size="13" font-weight="bold" text-anchor="middle">Room 301</text>
+            <text class="staff-room-number" data-room-number="01" x="115" y="105" fill="#e2e8f0" font-size="13" font-weight="bold" text-anchor="middle">Room 301</text>
             
             <rect x="180" y="40" width="130" height="150" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5"/>
-            <text x="245" y="105" fill="#e2e8f0" font-size="13" font-weight="bold" text-anchor="middle">Room 302</text>
+            <text class="staff-room-number" data-room-number="02" x="245" y="105" fill="#e2e8f0" font-size="13" font-weight="bold" text-anchor="middle">Room 302</text>
 
             <rect x="310" y="40" width="180" height="150" fill="#134e4a" stroke="#2dd4bf" stroke-width="1.5"/>
             <text x="400" y="105" fill="#ccfbf1" font-size="13" font-weight="bold" text-anchor="middle">🚿 Common Bath</text>
 
             <rect x="490" y="40" width="130" height="150" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5"/>
-            <text x="555" y="105" fill="#e2e8f0" font-size="13" font-weight="bold" text-anchor="middle">Room 303</text>
+            <text class="staff-room-number" data-room-number="03" x="555" y="105" fill="#e2e8f0" font-size="13" font-weight="bold" text-anchor="middle">Room 303</text>
 
             <rect x="620" y="40" width="130" height="150" fill="#713f12" stroke="#facc15" stroke-width="1.5"/>
             <text x="685" y="105" fill="#fef08a" font-size="13" font-weight="bold" text-anchor="middle">🍳 Pantry</text>
 
             <rect x="50" y="260" width="130" height="150" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5"/>
-            <text x="115" y="335" fill="#e2e8f0" font-size="13" font-weight="bold" text-anchor="middle">Room 304</text>
+            <text class="staff-room-number" data-room-number="04" x="115" y="335" fill="#e2e8f0" font-size="13" font-weight="bold" text-anchor="middle">Room 304</text>
 
             <rect x="180" y="260" width="220" height="150" fill="#312e81" stroke="#818cf8" stroke-width="1.5"/>
             <text x="290" y="335" fill="#e0e7ff" font-size="13" font-weight="bold" text-anchor="middle">📚 Study Lounge</text>
@@ -1265,7 +1272,7 @@
             <text x="480" y="335" fill="#d1fae5" font-size="13" font-weight="bold" text-anchor="middle">🧺 Laundry Room</text>
 
             <rect x="560" y="260" width="190" height="150" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5"/>
-            <text x="655" y="335" fill="#e2e8f0" font-size="13" font-weight="bold" text-anchor="middle">Room 305</text>
+            <text class="staff-room-number" data-room-number="05" x="655" y="335" fill="#e2e8f0" font-size="13" font-weight="bold" text-anchor="middle">Room 305</text>
 
             <!-- Pins Container Group -->
             <g id="pinsContainer"></g>
@@ -1454,6 +1461,7 @@
         dateTime: report.datetime ? report.datetime.replace("T", " ") : (report.dateTime || "2026-11-11 12:00"),
         locationType: locationType === "Others" || locationType.includes("Common Area") ? "Others" : "Unit",
         locationName: locationName,
+        floor: String(floorplan.floor || "3"),
         coords: { 
           x: floorplan.x !== undefined ? Math.round(floorplan.x) : 245, 
           y: floorplan.y !== undefined ? Math.round(floorplan.y) : 110 
@@ -1538,8 +1546,9 @@
       container.innerHTML = "";
 
       if (!tickets || tickets.length === 0) return;
+      const selectedFloor = document.getElementById("staff-floorplan-level").value;
 
-      tickets.forEach(ticket => {
+      tickets.filter(ticket => ticket.floor === selectedFloor).forEach(ticket => {
         const x = ticket.coords && ticket.coords.x !== undefined ? ticket.coords.x : 245;
         const y = ticket.coords && ticket.coords.y !== undefined ? ticket.coords.y : 110;
         const fill = ticket.urgency === "Urgent" ? "#ef4444" : ticket.urgency === "Medium" ? "#f59e0b" : "#10b981";
@@ -1549,7 +1558,7 @@
         g.style.cursor = "pointer";
         g.onclick = () => {
           document.getElementById("activePinBadge").textContent =
-            `📍 ${ticket.locationName} (Coords: X:${x}, Y:${y})`;
+            `📍 Level ${ticket.floor} — ${ticket.locationName} (Coords: X:${x}, Y:${y})`;
           openInspectModal(ticket.id);
         };
 
@@ -1559,6 +1568,15 @@
         `;
         container.appendChild(g);
       });
+    }
+
+    function changeStaffFloor() {
+      const floor = document.getElementById("staff-floorplan-level").value;
+      document.querySelectorAll("#staff-floorplan-svg .staff-room-number").forEach(room => {
+        room.textContent = `Room ${floor}${room.dataset.roomNumber}`;
+      });
+      document.getElementById("activePinBadge").textContent = `Showing incident pins for Level ${floor}.`;
+      renderFloorplanPins();
     }
 
     function filterByPin(id) {
@@ -1731,6 +1749,7 @@
     window.closeInspectModal = closeInspectModal;
     window.saveDispatchUpdate = saveDispatchUpdate;
     window.filterByPin = filterByPin;
+    window.changeStaffFloor = changeStaffFloor;
   </script>
 </body>
 </html>
