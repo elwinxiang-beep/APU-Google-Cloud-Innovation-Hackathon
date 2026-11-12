@@ -256,11 +256,16 @@ function enrichReportWithAiTriage(report) {
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
   initUser();
-  // Immediately load local/sample reports so UI is populated before Firebase callback
-  const localReports = localStorage.getItem(APP_STORAGE_KEY);
-  currentReports = (localReports ? JSON.parse(localReports) : [...SAMPLE_REPORTS]).map(enrichReportWithAiTriage);
+  
+  // Only load sample/local reports if a user is already authenticated
+  if (currentUser) {
+    const localReports = localStorage.getItem(APP_STORAGE_KEY);
+    currentReports = (localReports ? JSON.parse(localReports) : [...SAMPLE_REPORTS]).map(enrichReportWithAiTriage);
+    initRealtimeTickets();
+  } else {
+    currentReports = []; // Keep empty until login!
+  }
 
-  initRealtimeTickets();
   initFormDateTime();
   initNavigation();
   initFloorplanDefaults();
@@ -274,10 +279,19 @@ function initUser() {
     try {
       currentUser = JSON.parse(savedUser);
     } catch (e) {
-      currentUser = { ...DEMO_ACCOUNTS.student };
+      currentUser = null;
     }
   } else {
-    currentUser = { ...DEMO_ACCOUNTS.student };
+    // 🔒 No account logged in by default when the page loads
+    currentUser = null;
+  }
+
+  // If no user is logged in, automatically open the login modal to prompt them
+  if (!currentUser) {
+    setTimeout(() => {
+      openLoginModal();
+      showToast('Please sign in or select your profile to continue 🔐');
+    }, 200);
   }
 }
 
@@ -286,22 +300,37 @@ function initUser() {
  * Initializes real-time Firestore synchronization on app load.
  */
 function initRealtimeTickets() {
+  if (!currentUser) return; // Don't fetch tickets if not logged in
+
   try {
     listenToTickets((cloudTickets) => {
-      if (cloudTickets && cloudTickets.length > 0) {
+      if (cloudTickets) {
         currentReports = cloudTickets.map(enrichReportWithAiTriage);
       } else {
-        const localReports = localStorage.getItem(APP_STORAGE_KEY);
-        currentReports = (localReports ? JSON.parse(localReports) : [...SAMPLE_REPORTS]).map(enrichReportWithAiTriage);
+        currentReports = [];
       }
+      
+      // 🔒 Absolute Isolation Filter
+      if (currentUser && currentUser.role === 'student') {
+        const currentUserName = (currentUser.name || '').toLowerCase().trim();
+        const currentUserPhone = (currentUser.phone || '').replace(/[^0-9]/g, '');
+        
+        currentReports = currentReports.filter(r => {
+          const reportName = (r.reporterName || r.studentName || r.name || '').toLowerCase().trim();
+          const reportPhone = (r.phone || r.reporterPhone || '').replace(/[^0-9]/g, '');
+          return (currentUserName && reportName === currentUserName) || (currentUserPhone && reportPhone === currentUserPhone);
+        });
+      }
+      
+      localStorage.setItem(APP_STORAGE_KEY, JSON.stringify(currentReports));
+
       updateStats();
       renderReportList();
       renderWardenKanban();
       renderStaffFloorplanPins();
-      console.log("Real-time sync: UI & Warden Kanban updated with latest cloud tickets.");
     });
   } catch (err) {
-    console.warn("Firebase offline or not configured, running on local storage fallback:", err);
+    console.warn("Firebase connection error:", err);
   }
 }
 
@@ -624,7 +653,9 @@ function quickFillAccount(type) {
 async function handleLoginSubmit(event) {
   event.preventDefault();
   if (loginSelectedRole === 'student') {
-    const name = document.getElementById('login-student-name').value || 'Alex Tan';
+    // Strictly grab the value from the input field, with no hardcoded fallback name
+    const nameInput = document.getElementById('login-student-name');
+    const name = nameInput && nameInput.value.trim() ? nameInput.value.trim() : 'Student Resident';
     const id = document.getElementById('login-student-id').value || 'STU-2024-8891';
     const room = document.getElementById('login-student-room').value || 'Block A - Room 302';
     currentUser = {
@@ -656,6 +687,7 @@ async function handleLoginSubmit(event) {
   }
 
   localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(currentUser));
+  initRealtimeTickets();
   closeLoginModal();
   updateUI();
   showToast(`Welcome back, ${currentUser.name}!`);
@@ -1504,7 +1536,31 @@ function renderStudentPersonalReports() {
   const countBadge = document.getElementById('student-my-count');
   if (!container) return;
 
-  const studentReports = currentReports.filter(r => r.reporterName === currentUser.name || r.reporterPhone === currentUser.phone);
+  // 1. If no student is logged in, show empty state immediately
+  if (!currentUser || currentUser.role !== 'student') {
+    container.innerHTML = `
+      <div class="col-span-full py-8 text-center text-slate-400">
+        <p class="text-xs">Please sign in as a student resident to view your tickets.</p>
+        <button onclick="openLoginModal()" class="mt-2 text-xs font-bold text-brand-600 hover:underline">
+          Sign In Now →
+        </button>
+      </div>
+    `;
+    if (countBadge) countBadge.textContent = '0 Reports';
+    return;
+  }
+
+  const currentUserName = currentUser.name.toLowerCase().trim();
+  const currentUserPhone = (currentUser.phone || '').replace(/[^0-9]/g, '');
+
+  // 2. 🔒 ABSOLUTE LOCKDOWN FILTER: Only keep tickets where the reporter name EXACTLY matches the logged-in student
+  const studentReports = currentReports.filter(r => {
+    const reportName = (r.reporterName || r.studentName || r.name || '').toLowerCase().trim();
+    const activeUserName = (currentUser && currentUser.name ? currentUser.name : '').toLowerCase().trim();
+    
+    // 🔒 Absolute Lockdown: If logged in as 'p', 'Alex Tan' tickets will return FALSE and disappear instantly
+    return activeUserName && reportName === activeUserName;
+  });
 
   if (countBadge) {
     countBadge.textContent = `${studentReports.length} ${studentReports.length === 1 ? 'Report' : 'Reports'}`;
@@ -1791,7 +1847,7 @@ async function saveReportStaffUpdate(reportId) {
   const report = currentReports.find(r => r.id === reportId);
   if (!report) return;
 
-  const newStatus = document.getElementById('modalStatus').value; // e.g., "Resolved"
+  const newStatus = document.getElementById('modal-status-select')?.value || report.status;
   const newNotes = document.getElementById('modal-staff-notes')?.value || 'Updated via Staff Portal';
 
   report.status = newStatus;
@@ -1812,6 +1868,7 @@ async function saveReportStaffUpdate(reportId) {
   saveReports();
   renderReportList();
   renderWardenKanban();
+  closeReportDetail();
   showToast(`Ticket ${report.id} updated to "${newStatus}"!`);
 }
 

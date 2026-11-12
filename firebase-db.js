@@ -107,6 +107,7 @@ export function listenToTickets(onUpdateCallback) {
         let remoteReports = [];
         querySnapshot.forEach((docSnap) => {
             const data = docSnap.data();
+            console.log("Found Firebase Doc:", docSnap.id, docSnap.data()); //
             remoteReports.push({ 
                 firebaseDocId: docSnap.id, 
                 ...data,
@@ -114,7 +115,7 @@ export function listenToTickets(onUpdateCallback) {
                 id: data.id || docSnap.id 
             });
         });
-        updateStats(remoteReports)
+        updateStats();
         
         // Pass fresh data back to the frontend application
         onUpdateCallback(remoteReports);
